@@ -1,2 +1,2 @@
-# intelligent_agents_simulations
-A Python projects that uses AI models to simulate agents involved in simulations
+# ai_agents
+A Python project that uses LLMs to simulate intelligence in agents
