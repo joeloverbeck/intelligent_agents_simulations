@@ -27,6 +27,9 @@ class DisparityBetweenDatabasesError(Exception):
 class DatabaseDoesntExistError(Exception):
     pass
 
+class UnableToConnectWithAiModelError(Exception):
+    pass
+
 
 def log_error(error_text):
     """Logs the error text into a text file.

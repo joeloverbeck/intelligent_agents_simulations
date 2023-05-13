@@ -1,1 +1,4 @@
+annoy==1.17.2
+anytree==2.8.0
 Requests==2.30.0
+sentence_transformers==2.2.2
