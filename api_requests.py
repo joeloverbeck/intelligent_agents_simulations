@@ -47,7 +47,9 @@ def request_response_from_ai_model(prompt):
     try:
         response = requests.post(uri, json=request, timeout=25)
     except requests.exceptions.ConnectionError as exception:
-        raise UnableToConnectWithAiModelError("I was unable to connect with the AI model to request a response. Are you sure it's running properly? Error: {exception}") from exception
+        error_message = "I was unable to connect with the AI model to request a "
+        error_message += f"response. Are you sure it's running properly? Error: {exception}"
+        raise UnableToConnectWithAiModelError(error_message) from exception
 
     if response.status_code == 200:
         result = response.json()["results"][0]["text"]

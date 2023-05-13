@@ -6,7 +6,7 @@ def main():
     # For reverse-proxied streaming, the remote will likely host with ssl - https://
     # URI = 'https://your-uri-here.trycloudflare.com/api/v1/generate'
 
-    prompt = f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}What is the capital of Paris?{INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING}:"
+    prompt = f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}What is the capital of France?{INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING}:"
 
     response = request_response_from_ai_model(prompt)
 
