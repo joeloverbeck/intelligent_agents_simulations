@@ -25,6 +25,7 @@ from errors import (
 )
 from math_utils import calculate_recency, normalize_value
 from regular_expression_utils import extract_rating_from_text
+from wrappers import validate_agent_type
 
 
 def delete_memories_database(agent):
@@ -102,7 +103,6 @@ def create_vectorized_memory(memory_description, current_timestamp, index):
 
 def create_vector_database(database_filename, new_index):
     new_index.build(NUMBER_OF_TREES)
-
     new_index.save(database_filename)
 
 
@@ -123,12 +123,11 @@ def ensure_parity_between_databases(memories_raw_data, index):
         )
 
 
-def create_memories_database(agent, current_timestamp, seed_memories):
-    new_index = create_new_index(METRIC_ANGULAR)
-
+@validate_agent_type
+def save_memories(agent, current_timestamp, new_memories, new_index):
     memories = {}
 
-    for memory_description in seed_memories:
+    for memory_description in new_memories:
         vector_index, memory = create_vectorized_memory(
             memory_description, current_timestamp, new_index
         )
@@ -145,6 +144,30 @@ def create_memories_database(agent, current_timestamp, seed_memories):
     ensure_parity_between_databases(
         load_contents_of_json_file(json_filename), new_index
     )
+
+
+def create_memories_database(agent, current_timestamp, seed_memories):
+    new_index = create_new_index(METRIC_ANGULAR)
+
+    save_memories(agent, current_timestamp, seed_memories, new_index)
+
+
+def load_index_items_into_new_index(index, metric):
+    new_index = create_new_index(metric)
+
+    for i in range(index.get_n_items()):
+        new_index.add_item(i, index.get_item_vector(i))
+
+    # Vital to unload the original index, which should free up the database file.
+    index.unload()
+
+    return new_index
+
+
+def update_memories_database(agent, current_timestamp, new_memories, index):
+    new_index = load_index_items_into_new_index(index, METRIC_ANGULAR)
+
+    save_memories(agent, current_timestamp, new_memories, new_index)
 
 
 def create_new_index(metric):
@@ -195,3 +218,15 @@ def load_agent_memories(agent):
     memories_raw_data = format_json_memory_data_for_python(memories_raw_data)
 
     return index, memories_raw_data
+
+
+def load_index_items_into_new_index(index, metric):
+    new_index = create_new_index(metric)
+
+    for i in range(index.get_n_items()):
+        new_index.add_item(i, index.get_item_vector(i))
+
+    # Vital to unload the original index, which should free up the database file.
+    index.unload()
+
+    return new_index

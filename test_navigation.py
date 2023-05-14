@@ -3,14 +3,13 @@ import unittest
 
 from anytree import Node
 from agent import Agent
-from errors import EmptyEnvironmentTreeError
 
 from location import Location
 from navigation import (
-    find_all_sandbox_objects_in_environment_tree,
     get_node_one_step_closer_to_destination,
 )
 from sandbox_object import SandboxObject
+from sandbox_object_utils import find_all_sandbox_objects_in_environment_tree
 
 
 class TestSandboxObjects(unittest.TestCase):
@@ -41,8 +40,6 @@ class TestSandboxObjects(unittest.TestCase):
         self.assertEqual(nodes_that_contain_sandbox_objects[0].name.name, bed.name.name)
 
 
-
-
 class TestMovementTowardsDestination(unittest.TestCase):
     def test_can_move_a_node_closer_to_destination(self):
         town = Node(Location("town"))
@@ -59,7 +56,6 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertEqual(node.name.name, house.name.name)
 
     def test_can_move_a_node_closer_to_destination_when_destination_is_ancestor(self):
-
         town = Node(Location("town"))
         house = Node(Location("house"), parent=town)
         bedroom = Node(Location("bedroom"), parent=house)
@@ -73,7 +69,9 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertFalse(isinstance(node, NoneType))
         self.assertEqual(node.name.name, house.name.name)
 
-    def test_can_move_a_node_closer_to_destination_when_they_are_on_different_branches(self):
+    def test_can_move_a_node_closer_to_destination_when_they_are_on_different_branches(
+        self,
+    ):
         town = Node(Location("town"))
         house_1 = Node(Location("house"), parent=town)
         bedroom = Node(Location("bedroom"), parent=house_1)
@@ -123,14 +121,13 @@ class TestMovementTowardsDestination(unittest.TestCase):
         agent.set_destination(town)
         node = get_node_one_step_closer_to_destination(agent)
         self.assertTrue(isinstance(node, NoneType))
-    
+
     def test_destination_none(self):
         town = Node(Location("town"))
         agent = Agent("Aileen", 22, town, town)
         agent.set_destination(None)
         node = get_node_one_step_closer_to_destination(agent)
         self.assertTrue(isinstance(node, NoneType))
-
 
 
 if __name__ == "__main__":

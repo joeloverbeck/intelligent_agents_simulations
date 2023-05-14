@@ -1,29 +1,20 @@
 import anytree
 
-from anytree.util import commonancestors
-
 from sandbox_object import SandboxObject
 from wrappers import validate_agent_type
 
 
-def find_all_sandbox_objects_in_environment_tree(environment_tree):
-    """Finds and returns all nodes in an environment tree that contains sandbox objects
-
-    Args:
-        environment_tree (Node): the root of an environment tree
-
-    Returns:
-        list: a list with all the nodes in the passed environment tree that contain sandbox objects
-    """
-    return [
-        node
-        for node in anytree.PreOrderIter(environment_tree)
-        if isinstance(node.name, SandboxObject)
-    ]
-
-
 @validate_agent_type
 def get_node_one_step_closer_to_destination(agent):
+    """Returns the node one step closer from the agent's current location to the destination.
+    Note: it can return None if no next step exists (such as when the agent is already at destination.)
+
+    Args:
+        agent (Agent): the agent whose route this function will track.
+
+    Returns:
+        Node: the node one step closer to the agent's destination
+    """
     current_location = agent.current_location
     destination = agent.destination
 

@@ -34,9 +34,6 @@ class UnableToConnectWithAiModelError(Exception):
     pass
 
 
-class EmptyEnvironmentTreeError(Exception):
-    pass
-
 def log_error(error_text):
     """Logs the error text into a text file.
 

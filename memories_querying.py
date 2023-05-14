@@ -1,3 +1,4 @@
+import heapq
 from defines import DECAY_RATE, get_json_filename
 from math_utils import calculate_recency, calculate_score
 from vector_storage import create_json_file, load_contents_of_json_file
@@ -19,7 +20,7 @@ def retrieve_description_from_scored_results_entry(vector_id, memories_raw_data)
 
 @validate_agent_type
 def search_memories(
-    agent, current_timestamp, query_vector, index, number_of_results, memories_raw_data
+    agent, current_timestamp, query_vector, number_of_results, memories_raw_data, index
 ):
     """Searches the memories of an agent for the most relevant entries related to the query vector.
 
@@ -27,9 +28,9 @@ def search_memories(
         agent (Agent): the agent to whom the memories belong
         current_timestamp (datetime): the current timestamp
         query_vector (List[Tensor] | ndarray | Tensor): the query vector that will be used for the search
-        index (AnnoyIndex): the index of the Annoy vector database
         number_of_results (int): how many results must be retrieved from the vector database
         memories_raw_data (dict): the raw data of the agent's memories
+        index (AnnoyIndex): the index of the Annoy vector database
 
     Returns:
         list: the sorted results of the query
@@ -60,6 +61,34 @@ def search_memories(
     sorted_results = sorted(scores, key=lambda x: x[1], reverse=True)
 
     return sorted_results
+
+
+def get_most_recent_memories(target_timestamp, number_of_memories, memories_raw_data):
+    """Retrieves a number of most recent experiences present in the passed
+    dict of memories, given the target_timestamp (usually the current time)
+
+    Returns:
+        dict
+            A dictionary with a number of memories at the most determined by 'number_of_memories'.
+    """
+    # Initialize a heap queue to store the difference and entry
+    closest_entries = []
+
+    # Iterate over the dictionary
+    for key, entry in memories_raw_data.items():
+        # Calculate the absolute difference between the entry's timestamp and the target datetime
+        difference = abs(entry["creation_timestamp"] - target_timestamp)
+
+        # Push the difference and entry onto the heap queue
+        heapq.heappush(closest_entries, (difference, key))
+
+    closest_entries = [
+        (difference, memories_raw_data[key])
+        for difference, key in heapq.nsmallest(number_of_memories, closest_entries)
+    ]
+
+    # Extract the entries from the tuples and return them
+    return [entry for _, entry in closest_entries]
 
 
 @validate_agent_type

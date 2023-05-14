@@ -19,9 +19,9 @@ def generate_summary_description_segment(
         agent,
         current_timestamp,
         process_raw_data(query),
-        index,
         NUMBER_OF_RESULTS_FOR_QUERY,
         memories_raw_data,
+        index,
     )
 
     prompt = prompt_header
