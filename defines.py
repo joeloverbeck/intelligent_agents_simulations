@@ -14,9 +14,13 @@ NUMBER_OF_TREES = 10
 METRIC_ANGULAR = "angular"
 DECAY_RATE = 0.99
 NUMBER_OF_RESULTS_FOR_QUERY = 50
+SCORE_ALPHA = 1.0
+SCORE_BETA = 1.0
+SCORE_GAMMA = 1.0
 
-INSTRUCT_WIZARDLM_PROMPT_HEADER = "Input\n"
+INSTRUCT_WIZARDLM_PROMPT_HEADER = ""
 INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING = "\n### Response:"
+
 
 def get_seed_memories_filename(agent):
     """Returns the standarized filename for the seed_memories text file.

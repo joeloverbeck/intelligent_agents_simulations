@@ -1,7 +1,7 @@
 """This module handles operations related to API requests.
 
 """
-# Run oobabooga server with: python server.py --model-menu --listen --wbits=4 --groupsize=128 --no-stream --extensions api
+# Run oobabooga server with: python server.py --model-menu --listen --no-stream --extensions api
 
 import requests
 
@@ -48,7 +48,9 @@ def request_response_from_ai_model(prompt):
         response = requests.post(uri, json=request, timeout=25)
     except requests.exceptions.ConnectionError as exception:
         error_message = "I was unable to connect with the AI model to request a "
-        error_message += f"response. Are you sure it's running properly? Error: {exception}"
+        error_message += (
+            f"response. Are you sure it's running properly? Error: {exception}"
+        )
         raise UnableToConnectWithAiModelError(error_message) from exception
 
     if response.status_code == 200:

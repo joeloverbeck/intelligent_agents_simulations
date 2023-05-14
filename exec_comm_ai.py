@@ -1,5 +1,8 @@
 from api_requests import request_response_from_ai_model
-from defines import INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING, INSTRUCT_WIZARDLM_PROMPT_HEADER
+from defines import (
+    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
+    INSTRUCT_WIZARDLM_PROMPT_HEADER,
+)
 
 
 def main():

@@ -13,8 +13,10 @@ class InvalidParameterError(Exception):
         Exception (Exception): the wrapped exception
     """
 
+
 class MissingCharacterSummaryError(Exception):
     pass
+
 
 class FailedToDeleteFileError(Exception):
     pass
@@ -26,6 +28,7 @@ class DisparityBetweenDatabasesError(Exception):
 
 class DatabaseDoesntExistError(Exception):
     pass
+
 
 class UnableToConnectWithAiModelError(Exception):
     pass

@@ -1,3 +1,4 @@
+import datetime
 import unittest
 
 from anytree import Node
@@ -17,7 +18,11 @@ class TestCanLoadSeedMemories(unittest.TestCase):
         self.index, self.memories_raw_data = load_agent_memories(self.agent)
 
     def test_can_create_character_summary(self):
-        character_summary = request_character_summary(self.agent, self.memories_raw_data, self.index)
+        current_time = datetime.datetime(2023, 5, 11, 10, 30, 45)
+
+        character_summary = request_character_summary(
+            self.agent, current_time, self.memories_raw_data, self.index
+        )
 
         self.assertTrue(isinstance(character_summary, str))
 

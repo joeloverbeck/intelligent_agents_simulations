@@ -1,3 +1,5 @@
+"""This module contains many operations related to storing and retrieving agent memories
+"""
 import datetime
 import json
 import os
@@ -70,7 +72,9 @@ def create_memory_dictionary(memory_description, current_timestamp):
     importance_prompt += "and 10 is extremely poignant (e.g., a break up, college acceptance), rate the likely poignancy "
     importance_prompt += "of the following piece of memory."
     importance_prompt += f" Memory: {memory_description}"
-    importance_prompt += "\nRating: <fill in>." + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
+    importance_prompt += (
+        "\nRating: <fill in>." + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
+    )
 
     importance_response = request_response_from_ai_model(importance_prompt)
 
@@ -117,7 +121,7 @@ def ensure_parity_between_databases(memories_raw_data, index):
         raise DisparityBetweenDatabasesError(
             f"The length of the index contents ({index.get_n_items()}) doesn't match the length of the raw memory data ({len(memories_raw_data)})"
         )
-    
+
 
 def create_memories_database(agent, current_timestamp, seed_memories):
     new_index = create_new_index(METRIC_ANGULAR)
