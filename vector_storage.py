@@ -24,7 +24,7 @@ from errors import (
     FailedToDeleteFileError,
 )
 from math_utils import calculate_recency, normalize_value
-from regular_expression_utils import extract_importance_from_text
+from regular_expression_utils import extract_rating_from_text
 
 
 def delete_memories_database(agent):
@@ -78,7 +78,7 @@ def create_memory_dictionary(memory_description, current_timestamp):
 
     importance_response = request_response_from_ai_model(importance_prompt)
 
-    extracted_importance = extract_importance_from_text(importance_response)
+    extracted_importance = extract_rating_from_text(importance_response)
 
     normalized_importance = normalize_value(extracted_importance)
 
