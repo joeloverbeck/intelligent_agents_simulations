@@ -1,0 +1,42 @@
+{
+    "name": "town",
+    "description": "a quaint town",
+    "type": "Location",
+    "children": [
+        {
+            "name": "house",
+            "description": "a two-story house",
+            "type": "Location",
+            "children": [
+                {
+                    "name": "bedroom",
+                    "description": "a place where people sleep and have naughty time",
+                    "type": "Location",
+                    "children": [
+                        {
+                            "name": "bed",
+                            "description": "a piece of furniture where people sleep and have naughty time",
+                            "type": "SandboxObject",
+                            "action_status": "idle",
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "kitchen",
+                    "description": "a place where people cook and eat meals",
+                    "type": "Location",
+                    "children": [
+                        {
+                            "name": "stove",
+                            "description": "an utensil that allows people to cook meals",
+                            "type": "SandboxObject",
+                            "action_status": "idle",
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

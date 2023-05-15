@@ -38,6 +38,14 @@ class AlgorithmError(Exception):
     pass
 
 
+class DirectoryDoesntExistError(Exception):
+    pass
+
+
+class FileDoesntExistError(Exception):
+    pass
+
+
 def log_error(error_text):
     """Logs the error text into a text file.
 

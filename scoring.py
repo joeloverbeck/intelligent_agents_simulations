@@ -1,9 +1,5 @@
 from anytree import Node
 from api_requests import request_response_from_ai_model
-from defines import (
-    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
-    INSTRUCT_WIZARDLM_PROMPT_HEADER,
-)
 from errors import InvalidParameterError
 from logging_messages import log_debug_message
 from regular_expression_utils import extract_rating_from_text
@@ -49,16 +45,13 @@ def request_rating_from_agent_for_sandbox_object_node(
         )
 
     # create the prompt to send to the AI model
-    prompt = INSTRUCT_WIZARDLM_PROMPT_HEADER + agent.get_character_summary() + "\n"
+    prompt = agent.get_character_summary() + "\n"
     prompt += f"Given the following object: {sandbox_object_node.name.name} ({sandbox_object_node.name.description}).\n"
     prompt += "On the scale of 1 to 10, where 1 is useless (isn't related to the action) and 10 is essential (best possible object to fulfill the action),"
     prompt += f" determine how {agent.name} would rate how essential the {sandbox_object_node.name.name} "
     prompt += f"(located in {sandbox_object_node.parent.name.name}) is for the following action: "
     prompt += f"{end_string_with_period(action)}\n"
-    prompt += (
-        f"Rate how essential the {sandbox_object_node.name.name} is regarding the action above. Output a number from 1 to 10:"
-        + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
-    )
+    prompt += f"Rate how essential the {sandbox_object_node.name.name} is regarding the action above. Output a number from 1 to 10:"
 
     log_debug_message(f"{prompt}")
 
@@ -88,17 +81,14 @@ def request_rating_from_agent_for_location_node(agent, action, location_node):
         )
 
     # Create the prompt to send to the AI model
-    prompt = INSTRUCT_WIZARDLM_PROMPT_HEADER + agent.get_character_summary() + "\n"
+    prompt = agent.get_character_summary() + "\n"
     prompt = f"{agent.name} is currently in {location_node.name}.\n"
     prompt += (
         "* Prefer to stay in the current area if the activity can be done there.\n"
     )
     prompt += f"How absolutely necessary is the location {location_node.name.name} "
     prompt += f"({location_node.name.description}) for {agent.name}'s action: {action}. Rate the location {location_node.name.name} "
-    prompt += (
-        "for the action with a number in the range [1, 10]:"
-        + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
-    )
+    prompt += "for the action with a number in the range [1, 10]:"
 
     log_debug_message(f"{prompt}")
 

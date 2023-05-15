@@ -8,8 +8,6 @@ from annoy import AnnoyIndex
 from api_requests import request_response_from_ai_model
 from defines import (
     DECAY_RATE,
-    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
-    INSTRUCT_WIZARDLM_PROMPT_HEADER,
     MODEL,
     METRIC_ANGULAR,
     NUMBER_OF_TREES,
@@ -69,13 +67,11 @@ def create_memory_dictionary(memory_description, current_timestamp):
         current_timestamp, most_recent_access_timestamp, DECAY_RATE
     )
 
-    importance_prompt = f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}On the scale of 1 to 10, where 1 is purely mundane (e.g., brushing teeth, making bed) "
+    importance_prompt = "On the scale of 1 to 10, where 1 is purely mundane (e.g., brushing teeth, making bed) "
     importance_prompt += "and 10 is extremely poignant (e.g., a break up, college acceptance), rate the likely poignancy "
     importance_prompt += "of the following piece of memory."
     importance_prompt += f" Memory: {memory_description}"
-    importance_prompt += (
-        "\nRating: <fill in>." + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
-    )
+    importance_prompt += "\nRating: <fill in>."
 
     importance_response = request_response_from_ai_model(importance_prompt)
 

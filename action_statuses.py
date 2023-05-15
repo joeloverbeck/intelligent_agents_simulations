@@ -1,8 +1,4 @@
 from api_requests import request_response_from_ai_model
-from defines import (
-    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
-    INSTRUCT_WIZARDLM_PROMPT_HEADER,
-)
 from anytree import Node
 from errors import AlgorithmError, InvalidParameterError
 from logging_messages import log_debug_message
@@ -20,11 +16,7 @@ def request_agent_action_status_for_using_object(agent, action):
     Returns:
         str: the agent's action status for using an object
     """
-    prompt = INSTRUCT_WIZARDLM_PROMPT_HEADER
-    prompt += (
-        f"Write a summary of the action {action} in a single sentence:"
-        + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
-    )
+    prompt = f"Write a summary of the action {action} in a single sentence:"
 
     response = request_response_from_ai_model(prompt)
 
@@ -56,12 +48,8 @@ def request_used_object_action_status(agent):
             f"The function {request_used_object_action_status.__name__} expected 'agent.using_object' to be a node containing a SandboxObject."
         )
 
-    prompt = (
-        INSTRUCT_WIZARDLM_PROMPT_HEADER
-        + f"Given the following action that {agent.name} is performing on {agent.using_object.name.name}:"
-    )
+    prompt = f"Given the following action that {agent.name} is performing on {agent.using_object.name.name}:"
     prompt += f" {agent.action_status}. What should be the object's {agent.using_object.name.name} status now? Write it in a single sentence:"
-    prompt += INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
 
     response = request_response_from_ai_model(prompt)
 

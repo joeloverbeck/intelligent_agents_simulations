@@ -1,9 +1,5 @@
 from api_requests import request_response_from_ai_model
-from defines import (
-    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
-    INSTRUCT_WIZARDLM_PROMPT_HEADER,
-    NUMBER_OF_RESULTS_FOR_QUERY,
-)
+from defines import NUMBER_OF_RESULTS_FOR_QUERY
 from logging_messages import log_debug_message
 from memories_querying import (
     retrieve_description_from_scored_results_entry,
@@ -14,8 +10,21 @@ from wrappers import validate_agent_type
 
 
 def generate_summary_description_segment(
-    agent, current_timestamp, query, prompt_header, memories_raw_data, index
+    agent, current_timestamp, query, prompt, memories_raw_data, index
 ):
+    """Genererates a segment of a character summary
+
+    Args:
+        agent (Agent): the agent to whom the summary description corresponds
+        current_timestamp (datetime): the current timestamp
+        query (str): the query that will be made to the agent's memories
+        prompt_header (str): the header for the prompt
+        memories_raw_data (dict): the raw data of the agent's memories
+        index (AnnoyIndex): the index of the Annoy library
+
+    Returns:
+        str: the response from the AI model
+    """
     scored_results = search_memories(
         agent,
         current_timestamp,
@@ -25,14 +34,10 @@ def generate_summary_description_segment(
         index,
     )
 
-    prompt = prompt_header
-
     for _, vector_id in enumerate(scored_results):
         prompt += "- " + retrieve_description_from_scored_results_entry(
             vector_id, memories_raw_data
         )
-
-    prompt += INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
 
     log_debug_message(f"{prompt}")
 
@@ -53,7 +58,7 @@ def request_character_summary(agent, current_timestamp, memories_raw_data, index
         str: the generated summary description for the agent involved
     """
     # First of all we perform a retrieval on the query "[name]'s core characteristics"
-    prompt = f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}How would one describe {agent.name}'s core characteristics given the following statements? "
+    prompt = f"How would one describe {agent.name}'s core characteristics given the following statements? "
     prompt += f"Start the sentence by saying either '{agent.name} is' or '{agent.name} has':\n"
     core_characteristics = generate_summary_description_segment(
         agent,
@@ -64,7 +69,7 @@ def request_character_summary(agent, current_timestamp, memories_raw_data, index
         index,
     )
 
-    prompt = f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}How would one describe {agent.name}'s current daily occupation given the following statements? "
+    prompt = f"How would one describe {agent.name}'s current daily occupation given the following statements? "
     prompt += f"Start the sentence by saying either '{agent.name} is' or '{agent.name} has':\n"
 
     current_daily_occupation = generate_summary_description_segment(
@@ -76,7 +81,7 @@ def request_character_summary(agent, current_timestamp, memories_raw_data, index
         index,
     )
 
-    prompt = f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}How would one describe {agent.name}'s feeling about his recent progress in life given the "
+    prompt = f"How would one describe {agent.name}'s feeling about his recent progress in life given the "
     prompt += f"following statements? Start the sentence by saying either '{agent.name} is' or '{agent.name} has':\n"
 
     recent_progress_in_life = generate_summary_description_segment(
@@ -92,7 +97,7 @@ def request_character_summary(agent, current_timestamp, memories_raw_data, index
         agent,
         current_timestamp,
         f"{agent.name}'s innate traits",
-        f"{INSTRUCT_WIZARDLM_PROMPT_HEADER}How would one describe {agent.name}'s innate traits given the following statements? Write it solely as a series of adjectives:\n",
+        f"How would one describe {agent.name}'s innate traits given the following statements? Write it solely as a series of adjectives:\n",
         memories_raw_data,
         index,
     )
