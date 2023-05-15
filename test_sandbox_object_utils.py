@@ -1,8 +1,10 @@
 import unittest
 from agent import Agent
 
+from anytree import Node
+from location import Location
 from sandbox_object import SandboxObject
-from sandbox_object_utils import request_rating_from_agent_for_sandbox_object
+from sandbox_object_utils import request_rating_from_agent_for_sandbox_object_node
 
 
 class TestRequestingAgentsRatingOfSandboxObject(unittest.TestCase):
@@ -12,6 +14,10 @@ class TestRequestingAgentsRatingOfSandboxObject(unittest.TestCase):
             "a piece of furniture where people read, write, or sit at a computer",
         )
 
+        location_node = Node(Location("house", "a two-story house"))
+
+        sandbox_object_node = Node(sandbox_object, parent=location_node)
+
         self.assertEqual(sandbox_object.name, "desk")
 
         agent = Agent("Eileen", 22, None, None)
@@ -20,8 +26,8 @@ class TestRequestingAgentsRatingOfSandboxObject(unittest.TestCase):
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer"
         )
 
-        rating = request_rating_from_agent_for_sandbox_object(
-            agent, "read and take notes for research paper", sandbox_object
+        rating = request_rating_from_agent_for_sandbox_object_node(
+            agent, "read and take notes for research paper", sandbox_object_node
         )
 
         self.assertTrue(isinstance(rating, int))

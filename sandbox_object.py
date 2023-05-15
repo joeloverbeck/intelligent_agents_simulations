@@ -3,6 +3,8 @@ class SandboxObject:
         self.name = name
         self.description = description
 
+        self.action_status = None
+
     def __str__(self):
         return f"Sandbox object: {self.name}"
 

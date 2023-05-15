@@ -14,7 +14,9 @@ class Agent:
         self.current_location = current_location
         self.environment_tree = environment_tree
 
+        self.action_status = None
         self.destination = None
+        self.action_status = None
 
         self._character_summary = None
 

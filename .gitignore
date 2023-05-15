@@ -36,6 +36,9 @@ MANIFEST
 .flake8
 .pylintrc
 
+# OpenAI key
+api_key.txt
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt

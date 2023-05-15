@@ -4,6 +4,7 @@ from defines import (
     INSTRUCT_WIZARDLM_PROMPT_HEADER,
     NUMBER_OF_RESULTS_FOR_QUERY,
 )
+from logging_messages import log_debug_message
 from memories_querying import (
     retrieve_description_from_scored_results_entry,
     search_memories,
@@ -33,7 +34,7 @@ def generate_summary_description_segment(
 
     prompt += INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
 
-    print(f"TEST prompt: {prompt}")
+    log_debug_message(f"{prompt}")
 
     return request_response_from_ai_model(prompt)
 
@@ -102,6 +103,8 @@ def request_character_summary(agent, current_timestamp, memories_raw_data, index
         f"{core_characteristics}\n{current_daily_occupation}\n{recent_progress_in_life}"
     )
 
-    print(f"TEST summary description:\n{summary_description}")
+    log_debug_message(
+        f"Function {request_character_summary.__name__}:\n{summary_description}"
+    )
 
     return summary_description

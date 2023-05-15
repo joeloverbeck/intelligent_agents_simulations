@@ -11,8 +11,8 @@ class TestCanCreateAgentsProperly(unittest.TestCase):
         pass
 
     def test_can_create_an_agent_properly(self):
-        town_node = Node(Location("town"))
-        house_node = Node(Location("house"), parent=town_node)
+        town_node = Node(Location("town", "a quaint town"))
+        house_node = Node(Location("house", "a two-story house"), parent=town_node)
 
         agent = Agent("Aileen", 22, house_node, town_node)
 

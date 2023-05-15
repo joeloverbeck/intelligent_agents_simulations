@@ -34,12 +34,16 @@ class UnableToConnectWithAiModelError(Exception):
     pass
 
 
+class AlgorithmError(Exception):
+    pass
+
+
 def log_error(error_text):
     """Logs the error text into a text file.
 
     Args:
         error_text (_type_): _description_
     """
-    with open("log.txt", "a", encoding="utf8") as file:
+    with open("logging/errors.txt", "a", encoding="utf8") as file:
         file.write(json.dumps(error_text, default=str))
         file.write(os.linesep)

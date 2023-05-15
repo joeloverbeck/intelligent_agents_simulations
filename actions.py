@@ -5,6 +5,7 @@ from defines import (
     INSTRUCT_WIZARDLM_PROMPT_HEADER,
     NUMBER_OF_RESULTS_FOR_QUERY,
 )
+from logging_messages import log_debug_message
 from memories_querying import get_most_recent_memories
 from string_utils import end_string_with_period
 from wrappers import validate_agent_has_character_summary, validate_agent_type
@@ -38,7 +39,7 @@ def request_what_action_to_take_now(agent, current_timestamp, most_recent_memori
 
 @validate_agent_type
 @validate_agent_has_character_summary
-def request_for_what_length_of_time_the_plan_should_take_place(
+def request_for_what_length_of_time_the_action_should_take_place(
     agent, current_timestamp, action, most_recent_memories
 ):
     """Requests from the AI model for what length the plan should take place.
@@ -93,13 +94,13 @@ def create_action(
         agent, current_timestamp, most_recent_memories
     )
 
-    length_of_time = request_for_what_length_of_time_the_plan_should_take_place(
+    length_of_time = request_for_what_length_of_time_the_action_should_take_place(
         agent, current_timestamp, action, most_recent_memories
     )
 
     action = f"{format_date(current_timestamp)}. {action} {length_of_time}"
 
-    print(f"Action decided: {action}")
+    log_debug_message(f"Function {create_action.__name__}:\n{action}")
 
     # Save the memory in the file.
     update_memories_database_function(agent, current_timestamp, [action], index)

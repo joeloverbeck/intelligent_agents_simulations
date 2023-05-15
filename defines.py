@@ -21,6 +21,9 @@ SCORE_GAMMA = 1.0
 INSTRUCT_WIZARDLM_PROMPT_HEADER = ""
 INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING = "\n### Response:"
 
+DEBUGGING = True
+USE_GPT = False
+
 
 def get_seed_memories_filename(agent):
     """Returns the standarized filename for the seed_memories text file.
