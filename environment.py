@@ -26,7 +26,7 @@ def build_environment_tree(node_data, parent=None):
         instance = Location(node_data["name"], node_data["description"])
     elif node_data["type"] == "SandboxObject":
         instance = SandboxObject(node_data["name"], node_data["description"])
-        instance.action_status = node_data["action_status"]
+        instance.set_action_status(node_data["action_status"])
 
     node = Node(instance, parent=parent)
 

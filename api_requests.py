@@ -5,7 +5,13 @@
 
 import json
 import requests
-from defines import INSTRUCT_GPT_PROMPT_ANSWER_OPENING, INSTRUCT_GPT_PROMPT_HEADER, INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING, INSTRUCT_WIZARDLM_PROMPT_HEADER, USE_GPT
+from defines import (
+    INSTRUCT_GPT_PROMPT_ANSWER_OPENING,
+    INSTRUCT_GPT_PROMPT_HEADER,
+    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
+    INSTRUCT_WIZARDLM_PROMPT_HEADER,
+    USE_GPT,
+)
 
 from errors import UnableToConnectWithAiModelError
 from logging_messages import log_debug_message
@@ -100,7 +106,11 @@ def try_to_get_a_response_from_oobabooga(prompt):
     host = "localhost:5000"
     uri = f"http://{host}/api/v1/generate"
 
-    prompt = INSTRUCT_WIZARDLM_PROMPT_HEADER + prompt + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
+    prompt = (
+        INSTRUCT_WIZARDLM_PROMPT_HEADER
+        + prompt
+        + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
+    )
 
     request_for_oobabooga = {
         "prompt": prompt,

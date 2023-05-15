@@ -58,7 +58,7 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, town, town)
 
-        agent.set_destination(bedroom)
+        agent.set_destination_node(bedroom)
 
         node = get_node_one_step_closer_to_destination(agent)
 
@@ -75,7 +75,7 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, bedroom, town)
 
-        agent.set_destination(town)
+        agent.set_destination_node(town)
 
         node = get_node_one_step_closer_to_destination(agent)
 
@@ -100,7 +100,7 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, kitchen, town)
 
-        agent.set_destination(bedroom)
+        agent.set_destination_node(bedroom)
 
         node = get_node_one_step_closer_to_destination(agent)
 
@@ -113,7 +113,7 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, house, town)
 
-        agent.set_destination(house)
+        agent.set_destination_node(house)
 
         node = get_node_one_step_closer_to_destination(agent)
 
@@ -132,7 +132,7 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, kitchen, town)
 
-        agent.set_destination(bedroom)
+        agent.set_destination_node(bedroom)
 
         node = get_node_one_step_closer_to_destination(agent)
 
@@ -142,14 +142,14 @@ class TestMovementTowardsDestination(unittest.TestCase):
     def test_single_node_tree(self):
         town = Node(Location("town", "a quaint town"))
         agent = Agent("Aileen", 22, town, town)
-        agent.set_destination(town)
+        agent.set_destination_node(town)
         node = get_node_one_step_closer_to_destination(agent)
         self.assertTrue(isinstance(node, NoneType))
 
     def test_destination_none(self):
         town = Node(Location("town", "a quaint town"))
         agent = Agent("Aileen", 22, town, town)
-        agent.set_destination(None)
+        agent.set_destination_node(None)
         node = get_node_one_step_closer_to_destination(agent)
         self.assertTrue(isinstance(node, NoneType))
 
@@ -204,12 +204,12 @@ class TestMoveOneNodeCloserToDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, town, town)
 
-        agent.destination = poster
+        agent.set_destination_node(poster)
 
         perform_agent_movement(agent)
 
         # After moving one step, the agent should now be at 'house'
-        self.assertEqual(agent.current_location, house)
+        self.assertEqual(agent.get_current_location_node(), house)
 
     def test_location_displacement_to_sandbox_object_node_when_at_location_that_contains_it(
         self,
@@ -230,13 +230,13 @@ class TestMoveOneNodeCloserToDestination(unittest.TestCase):
 
         agent = Agent("Aileen", 22, house, town)
 
-        agent.destination = poster
+        agent.set_destination_node(poster)
 
         perform_agent_movement(agent)
 
         # After moving one step, she should have entered the kitchen, where
         # the poster is located, so the destination should be poster
-        self.assertEqual(agent.current_location, poster)
+        self.assertEqual(agent.get_current_location_node(), poster)
 
 
 if __name__ == "__main__":

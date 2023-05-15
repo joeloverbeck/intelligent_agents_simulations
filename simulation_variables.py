@@ -22,4 +22,6 @@ def load_simulation_variables(simulation_name):
         data["current_timestamp"]
     )
 
+    data["minutes_advanced_each_step"] = int(data["minutes_advanced_each_step"])
+
     return data

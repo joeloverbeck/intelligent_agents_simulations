@@ -17,7 +17,7 @@ class TestCanCreateAgentsProperly(unittest.TestCase):
         agent = Agent("Aileen", 22, house_node, town_node)
 
         self.assertEqual(agent.name, "Aileen")
-        self.assertEqual(agent.current_location.name.name, "house")
+        self.assertEqual(agent.get_current_location_node().name.name, "house")
         self.assertEqual(agent.environment_tree.name.name, "town")
 
 

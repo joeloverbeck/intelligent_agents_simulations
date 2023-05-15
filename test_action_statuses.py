@@ -58,11 +58,11 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
             fake_determine_sandbox_object_destination_function,
         )
 
-        self.assertFalse(isinstance(agent.action_status, NoneType))
+        self.assertFalse(isinstance(agent.get_action_status(), NoneType))
 
         # the sandbox object's action status should be none, given
         # that it won't be used until the agent gets there.
-        self.assertTrue(isinstance(poster.name.action_status, NoneType))
+        self.assertTrue(isinstance(poster.name.get_action_status(), NoneType))
 
     def test_can_produce_using_object_action_statuses_for_at_destination(self):
         town = Node(Location("town", "a quaint town"))
@@ -99,8 +99,8 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
             fake_determine_sandbox_object_destination_function,
         )
 
-        self.assertFalse(isinstance(agent.action_status, NoneType))
-        self.assertFalse(isinstance(agent.action_status, NoneType))
+        self.assertFalse(isinstance(agent.get_action_status(), NoneType))
+        self.assertFalse(isinstance(agent.get_action_status(), NoneType))
 
 
 if __name__ == "__main__":

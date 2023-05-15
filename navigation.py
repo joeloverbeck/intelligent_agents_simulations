@@ -23,8 +23,8 @@ def get_node_one_step_closer_to_destination(agent):
     Returns:
         Node: the node one step closer to the agent's destination
     """
-    current_location = agent.current_location
-    destination = agent.destination
+    current_location = agent.get_current_location_node()
+    destination = agent.get_destination_node()
 
     # If the current_location and destination are the same, we return None;
     # there is no next node in the route
@@ -99,21 +99,21 @@ def determine_sandbox_object_destination_from_root(agent, action, root_node):
 
 @validate_agent_type
 def perform_agent_movement(agent):
-    if agent.current_location == agent.destination:
+    if agent.get_current_location_node() == agent.get_destination_node():
         # Agent is already at destination. No movement is needed.
-        agent.destination = None
+        agent.set_destination_node(None)
         return
 
     next_node_closer_to_destination = get_node_one_step_closer_to_destination(agent)
 
-    agent.current_location = next_node_closer_to_destination
+    agent.set_current_location_node(next_node_closer_to_destination)
 
     # After moving one step, it could be that this location contains the destination
     # sandbox object node.
-    if isinstance(agent.current_location.name, Location) and isinstance(
-        agent.destination.name, SandboxObject
+    if isinstance(agent.get_current_location_node().name, Location) and isinstance(
+        agent.get_destination_node().name, SandboxObject
     ):
-        for child in agent.current_location.children:
-            if child.name == agent.destination.name:
-                agent.current_location = child
+        for child in agent.get_current_location_node().children:
+            if child.name == agent.get_destination_node().name:
+                agent.set_current_location_node(child)
                 break

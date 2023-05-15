@@ -33,6 +33,24 @@ class TestSimulation(unittest.TestCase):
 
         self.assertEqual(town.name, environment_tree.name)
 
+    def test_can_step_the_simulation(self):
+        town = Node(Location("town", "a quaint town"))
+
+        simulation = Simulation("test_1")
+
+        def fake_load_environment_function(_simulation_name):
+            return town
+
+        simulation.set_load_environment_function(fake_load_environment_function)
+
+        simulation.initialize()
+
+        simulation.step()
+
+        comparison_time = datetime.datetime(2023, 5, 12, 11, 25, 45)
+
+        self.assertEqual(simulation.current_timestamp, comparison_time)
+
 
 if __name__ == "__main__":
     unittest.main()

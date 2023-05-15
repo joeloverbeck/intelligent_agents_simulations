@@ -1,13 +1,14 @@
 """This module contains the definition of the Simulation class
 
 """
+import datetime
 from environment import load_environment_tree_from_json
 from simulation_variables import load_simulation_variables
 
 
 class Simulation:
-    """This class handles running a simulation.
-    """
+    """This class handles running a simulation."""
+
     def __init__(self, name):
         self.name = name
 
@@ -16,6 +17,8 @@ class Simulation:
         self._load_environment_function = load_environment_tree_from_json
 
         self._environment_tree = None
+
+        self._minutes_advanced_each_step = None
 
     def set_load_environment_function(self, load_environment_function):
         """Sets the funciton that will load the environment tree
@@ -26,8 +29,7 @@ class Simulation:
         self._load_environment_function = load_environment_function
 
     def initialize(self):
-        """Initializes the simulation
-        """
+        """Initializes the simulation"""
         self._load_simulation_variables()
 
         self._environment_tree = self._load_environment_function(self.name)
@@ -44,3 +46,14 @@ class Simulation:
         simulation_variables = load_simulation_variables(self.name)
 
         self.current_timestamp = simulation_variables["current_timestamp"]
+        self._minutes_advanced_each_step = simulation_variables[
+            "minutes_advanced_each_step"
+        ]
+
+    def step(self):
+        """Executes one step of the simulation, advancing in the process the current timestamp
+        by the specified value loaded from the variables.
+        """
+        self.current_timestamp = self.current_timestamp + datetime.timedelta(
+            minutes=self._minutes_advanced_each_step
+        )

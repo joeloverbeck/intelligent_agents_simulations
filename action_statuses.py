@@ -39,22 +39,22 @@ def request_used_object_action_status(agent):
         str: the action status that should be used for the object being used
     """
     # at this point, the agent should have a node in 'using_object'
-    if agent.using_object is None:
+    if agent.get_using_object() is None:
         raise InvalidParameterError(
-            f"The function {request_used_object_action_status.__name__} expected 'agent.using_object' to have an object node at this point."
+            f"The function {request_used_object_action_status.__name__} expected 'agent.get_using_object()' to have an object node at this point."
         )
-    if not isinstance(agent.using_object.name, SandboxObject):
+    if not isinstance(agent.get_using_object().name, SandboxObject):
         raise InvalidParameterError(
-            f"The function {request_used_object_action_status.__name__} expected 'agent.using_object' to be a node containing a SandboxObject."
+            f"The function {request_used_object_action_status.__name__} expected 'agent.get_using_object()' to be a node containing a SandboxObject."
         )
 
-    prompt = f"Given the following action that {agent.name} is performing on {agent.using_object.name.name}:"
-    prompt += f" {agent.action_status}. What should be the object's {agent.using_object.name.name} status now? Write it in a single sentence:"
+    prompt = f"Given the following action that {agent.name} is performing on {agent.get_using_object().name.name}:"
+    prompt += f" {agent.get_action_status()}. What should be the object's {agent.get_using_object().name.name} status now? Write it in a single sentence:"
 
     response = request_response_from_ai_model(prompt)
 
     log_debug_message(
-        f"Object being used: {agent.using_object.name.name} --> Action status: {response}"
+        f"Object being used: {agent.get_using_object().name.name} --> Action status: {response}"
     )
 
     return response
@@ -67,14 +67,12 @@ def produce_action_status_for_movement(agent, action):
         agent (Agent): the agent for whom the movement action status will be created
         action (str): the action that the agent will be heading to perform
     """
-    log_debug_message(f"{agent.name} needs to move to {agent.destination.name.name}.")
+    log_debug_message(f"{agent.name} needs to move to {agent.get_destination_node().name.name}.")
 
-    agent.action_status = (
-        f"{agent.name} is heading to use {agent.destination.name.name} "
-    )
-    agent.action_status += f"(located in {agent.destination.parent.name}), due to the following action: {action}"
+    agent.set_action_status(f"{agent.name} is heading to use {agent.get_destination_node().name.name} ")
+    agent.set_action_status(agent.get_action_status() + f"(located in {agent.get_destination_node().parent.name}), due to the following action: {action}")
 
-    log_debug_message(f"{agent.name}: {agent.action_status}")
+    log_debug_message(f"{agent.name}: {agent.get_action_status()}")
 
 
 def determine_action_statuses_for_using_object(agent, destination_node, action):
@@ -89,12 +87,12 @@ def determine_action_statuses_for_using_object(agent, destination_node, action):
             f"The function {determine_action_statuses_for_using_object.__name__} expected 'destination_node' to be a Node."
         )
 
-    agent.using_object = destination_node
+    agent.set_using_object(destination_node)
 
-    agent.action_status = request_agent_action_status_for_using_object(agent, action)
+    agent.set_action_status(request_agent_action_status_for_using_object(agent, action))
 
     # Should ask the AI model what happens to the state of the object
-    agent.using_object.name.action_status = request_used_object_action_status(agent)
+    agent.get_using_object().name.set_action_status(request_used_object_action_status(agent))
 
 
 @validate_agent_type
@@ -123,17 +121,17 @@ def produce_action_statuses_for_agent_and_sandbox_object(
 
     # Now we have both the action and the destination node.
     # If the destination node is the current node, the agent doesn't move.
-    if destination_node == agent.current_location:
-        agent.destination = None
+    if destination_node == agent.get_current_location_node():
+        agent.set_destination_node(None)
         log_debug_message(
             f"{agent.name} is at destination {destination_node.name.name}."
         )
     else:
-        agent.destination = destination_node
+        agent.set_destination_node(destination_node)
 
     # If at this point the agent still has a destination, then the action status should
     # represent that.
-    if agent.destination is not None:
+    if agent.get_destination_node() is not None:
         produce_action_status_for_movement(agent, action)
 
         return
@@ -142,11 +140,11 @@ def produce_action_statuses_for_agent_and_sandbox_object(
     determine_action_statuses_for_using_object(agent, destination_node, action)
 
     # Sanity check:
-    if agent.action_status is None:
+    if agent.get_action_status() is None:
         raise AlgorithmError(
             f"In the function {produce_action_statuses_for_agent_and_sandbox_object.__name__}, the agent's action status should be set at this point."
         )
-    if agent.using_object.name.action_status is None:
+    if agent.get_using_object().name.get_action_status() is None:
         raise AlgorithmError(
             f"In the function {produce_action_statuses_for_agent_and_sandbox_object.__name__}, the used object's action status should be set at this point."
         )
