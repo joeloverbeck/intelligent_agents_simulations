@@ -10,8 +10,10 @@ from vector_storage import load_agent_memories
 
 class TestCanLoadSeedMemories(unittest.TestCase):
     def setUp(self):
-        town_node = Node(Location("town", "a quaint town"))
-        house_node = Node(Location("house", "a two-story house"), parent=town_node)
+        town_node = Node(Location("town", "town", "a quaint town"))
+        house_node = Node(
+            Location("house", "house", "a two-story house"), parent=town_node
+        )
 
         self.agent = Agent("test", 22, house_node, town_node)
 

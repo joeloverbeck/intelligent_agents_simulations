@@ -10,21 +10,23 @@ from sandbox_object_utils import determine_sandbox_object_node_to_use
 
 class TestDetermineSandboxObjectForAction(unittest.TestCase):
     def test_given_an_action_can_determine_a_single_sandbox_object_node_to_use(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where meals are cooked and eaten"),
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
             parent=house,
         )
 
         stove = Node(
-            SandboxObject("stove", "an utensil that allows people to cook meals"),
+            SandboxObject(
+                "stove", "stove", "an utensil that allows people to cook meals"
+            ),
             parent=kitchen,
         )
 
         Node(
             SandboxObject(
-                "poster", "a poster on the wall. The poster depicts guitars."
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
             ),
             parent=kitchen,
         )

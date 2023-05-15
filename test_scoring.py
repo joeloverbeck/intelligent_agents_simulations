@@ -9,7 +9,7 @@ from scoring import request_rating_from_agent_for_location_node
 class TestRequestingRatingFromAgentForLocation(unittest.TestCase):
     def test_can_receive_a_rating_from_agent_for_location(self):
         bedroom = Location(
-            "bedroom", "a place where people sleep, and have naughty times"
+            "bedroom", "bedroom", "a place where people sleep, and have naughty times"
         )
 
         agent = Agent("Aileen", 22, None, None)

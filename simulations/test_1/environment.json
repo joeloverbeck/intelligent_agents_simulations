@@ -1,19 +1,23 @@
 {
+    "identifier": "town",
     "name": "town",
     "description": "a quaint town",
     "type": "Location",
     "children": [
         {
+            "identifier": "house",
             "name": "house",
             "description": "a two-story house",
             "type": "Location",
             "children": [
                 {
+                    "identifier": "bedroom",
                     "name": "bedroom",
                     "description": "a place where people sleep and have naughty time",
                     "type": "Location",
                     "children": [
                         {
+                            "identifier": "bed",
                             "name": "bed",
                             "description": "a piece of furniture where people sleep and have naughty time",
                             "type": "SandboxObject",
@@ -23,11 +27,13 @@
                     ]
                 },
                 {
+                    "identifier": "kitchen",
                     "name": "kitchen",
                     "description": "a place where people cook and eat meals",
                     "type": "Location",
                     "children": [
                         {
+                            "identifier": "stove",
                             "name": "stove",
                             "description": "an utensil that allows people to cook meals",
                             "type": "SandboxObject",

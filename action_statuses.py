@@ -1,5 +1,7 @@
-from api_requests import request_response_from_ai_model
+"""This module provides methods for determining action statuses of both agents and sandbox objects
+"""
 from anytree import Node
+from api_requests import request_response_from_ai_model
 from errors import AlgorithmError, InvalidParameterError
 from logging_messages import log_debug_message
 from sandbox_object import SandboxObject
@@ -67,10 +69,17 @@ def produce_action_status_for_movement(agent, action):
         agent (Agent): the agent for whom the movement action status will be created
         action (str): the action that the agent will be heading to perform
     """
-    log_debug_message(f"{agent.name} needs to move to {agent.get_destination_node().name.name}.")
+    log_debug_message(
+        f"{agent.name} needs to move to {agent.get_destination_node().name.name}."
+    )
 
-    agent.set_action_status(f"{agent.name} is heading to use {agent.get_destination_node().name.name} ")
-    agent.set_action_status(agent.get_action_status() + f"(located in {agent.get_destination_node().parent.name}), due to the following action: {action}")
+    agent.set_action_status(
+        f"{agent.name} is heading to use {agent.get_destination_node().name.name} "
+    )
+    agent.set_action_status(
+        agent.get_action_status()
+        + f"(located in {agent.get_destination_node().parent.name}), due to the following action: {action}"
+    )
 
     log_debug_message(f"{agent.name}: {agent.get_action_status()}")
 
@@ -92,7 +101,9 @@ def determine_action_statuses_for_using_object(agent, destination_node, action):
     agent.set_action_status(request_agent_action_status_for_using_object(agent, action))
 
     # Should ask the AI model what happens to the state of the object
-    agent.get_using_object().name.set_action_status(request_used_object_action_status(agent))
+    agent.get_using_object().name.set_action_status(
+        request_used_object_action_status(agent)
+    )
 
 
 @validate_agent_type
@@ -116,7 +127,7 @@ def produce_action_statuses_for_agent_and_sandbox_object(
     )
 
     destination_node = determine_sandbox_object_destination_from_root_function(
-        agent, action, agent.environment_tree
+        agent, action, agent.get_environment_tree()
     )
 
     # Now we have both the action and the destination node.

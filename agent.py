@@ -1,7 +1,8 @@
 """Contains the Agent class, which defines an intelligent agent involved in a simulation.
 
 """
-from errors import MissingCharacterSummaryError
+from anytree import Node
+from errors import InvalidParameterError, MissingCharacterSummaryError
 
 
 class Agent:
@@ -11,8 +12,7 @@ class Agent:
         self.name = name
         self.age = age
 
-        self.environment_tree = environment_tree
-
+        self._environment_tree = environment_tree
         self._current_location_node = current_location_node
         self._action_status = None
         self._destination_node = None
@@ -20,12 +20,34 @@ class Agent:
 
         self._character_summary = None
 
+        self._observers = []
+
+    def set_environment_tree(self, environment_tree):
+        """Sets the environment tree of the agent.
+
+        Args:
+            environment_tree (Node): the root of the environment tree for the agent
+        """
+        self._environment_tree = environment_tree
+
+    def get_environment_tree(self):
+        """Returns the environment tree of the agent
+
+        Returns:
+            Node: returns the root node of the agent's environment tree
+        """
+        return self._environment_tree
+
     def set_current_location_node(self, current_location_node):
         """Sets the agent's current location
 
         Args:
             current_location_node (Node): the node that will be set as the current ocation
         """
+        if not isinstance(current_location_node, Node):
+            error_message = f"The function {self.set_current_location_node.__name__} expected 'current_location_node' to be a Node, but it was: {current_location_node}"
+            raise InvalidParameterError(error_message)
+
         self._current_location_node = current_location_node
 
     def get_current_location_node(self):
@@ -119,6 +141,24 @@ class Agent:
             Node: the agent's destination node
         """
         return self._destination_node
+
+    def subscribe(self, observer):
+        """Allows an object to subscribe to this Agent
+
+        Args:
+            observer (Object): the instance that will subscribe to this instance
+        """
+        if observer is not None:
+            self._observers.append(observer)
+
+    def notify(self, message):
+        if not isinstance(message, dict):
+            raise InvalidParameterError(
+                f"The function {self.notify.__name__} expected 'message' to be a dict, but it was: {message}"
+            )
+
+        for observer in self._observers:
+            observer.update(message)
 
     def __str__(self):
         return f"Agent: {self.name} ({self.age}) | Current location: {self._current_location_node.name.name}"

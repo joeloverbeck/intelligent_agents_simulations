@@ -24,16 +24,16 @@ def fake_create_action_function(
 
 class TestDetermineActionStatusesForAction(unittest.TestCase):
     def test_can_produce_movement_action_status_if_not_at_destination(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where meals are cooked and eaten"),
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
             parent=house,
         )
 
         poster = Node(
             SandboxObject(
-                "poster", "a poster on the wall. The poster depicts guitars."
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
             ),
             parent=kitchen,
         )
@@ -65,16 +65,16 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
         self.assertTrue(isinstance(poster.name.get_action_status(), NoneType))
 
     def test_can_produce_using_object_action_statuses_for_at_destination(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where meals are cooked and eaten"),
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
             parent=house,
         )
 
         poster = Node(
             SandboxObject(
-                "poster", "a poster on the wall. The poster depicts guitars."
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
             ),
             parent=kitchen,
         )

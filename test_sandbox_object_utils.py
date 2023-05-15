@@ -11,10 +11,11 @@ class TestRequestingAgentsRatingOfSandboxObject(unittest.TestCase):
     def test_can_retrieve_an_agents_rating_of_sandbox_object_given_plan(self):
         sandbox_object = SandboxObject(
             "desk",
+            "desk",
             "a piece of furniture where people read, write, or sit at a computer",
         )
 
-        location_node = Node(Location("house", "a two-story house"))
+        location_node = Node(Location("house", "house", "a two-story house"))
 
         sandbox_object_node = Node(sandbox_object, parent=location_node)
 

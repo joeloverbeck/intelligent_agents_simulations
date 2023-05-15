@@ -16,23 +16,30 @@ from sandbox_object_utils import find_all_sandbox_objects_in_environment_tree
 
 class TestSandboxObjects(unittest.TestCase):
     def test_can_find_all_objects_in_environment_tree(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         bedroom = Node(
-            Location("bedroom", "a place where people sleep and have naughty time"),
+            Location(
+                "bedroom", "bedroom", "a place where people sleep and have naughty time"
+            ),
             parent=house,
         )
         kitchen = Node(
-            Location("kitchen", "a place where people cook and eat meals"), parent=house
+            Location("kitchen", "kitchen", "a place where people cook and eat meals"),
+            parent=house,
         )
 
         stove = Node(
-            SandboxObject("stove", "an utensil that allows people to cook meals"),
+            SandboxObject(
+                "stove", "stove", "an utensil that allows people to cook meals"
+            ),
             parent=kitchen,
         )
         bed = Node(
             SandboxObject(
-                "bed", "a piece of furniture where people sleep and have naughty time"
+                "bed",
+                "bed",
+                "a piece of furniture where people sleep and have naughty time",
             ),
             parent=bedroom,
         )
@@ -49,10 +56,12 @@ class TestSandboxObjects(unittest.TestCase):
 
 class TestMovementTowardsDestination(unittest.TestCase):
     def test_can_move_a_node_closer_to_destination(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         bedroom = Node(
-            Location("bedroom", "a place where people sleep and have naughty time"),
+            Location(
+                "bedroom", "bedroom", "a place where people sleep and have naughty time"
+            ),
             parent=house,
         )
 
@@ -66,10 +75,12 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertEqual(node.name.name, house.name.name)
 
     def test_can_move_a_node_closer_to_destination_when_destination_is_ancestor(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         bedroom = Node(
-            Location("bedroom", "a place where people sleep and have naughty time"),
+            Location(
+                "bedroom", "bedroom", "a place where people sleep and have naughty time"
+            ),
             parent=house,
         )
 
@@ -85,16 +96,18 @@ class TestMovementTowardsDestination(unittest.TestCase):
     def test_can_move_a_node_closer_to_destination_when_they_are_on_different_branches(
         self,
     ):
-        town = Node(Location("town", "a quaint town"))
-        house_1 = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house_1 = Node(Location("house", "house", "a two-story house"), parent=town)
         bedroom = Node(
-            Location("bedroom", "a place where people sleep and have naughty time"),
+            Location(
+                "bedroom", "bedroom", "a place where people sleep and have naughty time"
+            ),
             parent=house_1,
         )
 
-        house_2 = Node(Location("house 2", "a two-story house"), parent=town)
+        house_2 = Node(Location("house_2", "house 2", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where people cook and eat meals"),
+            Location("kitchen", "kitchen", "a place where people cook and eat meals"),
             parent=house_2,
         )
 
@@ -108,8 +121,8 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertEqual(node.name.name, house_2.name.name)
 
     def test_same_current_and_destination_location(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
 
         agent = Agent("Aileen", 22, house, town)
 
@@ -120,14 +133,17 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertTrue(isinstance(node, NoneType))
 
     def test_same_branch_non_direct_ancestor_descendant(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         bedroom = Node(
-            Location("bedroom", "a place where people sleep and have naughty time"),
+            Location(
+                "bedroom", "bedroom", "a place where people sleep and have naughty time"
+            ),
             parent=house,
         )
         kitchen = Node(
-            Location("kitchen", "a place where people cook and eat meals"), parent=house
+            Location("kitchen", "kitchen", "a place where people cook and eat meals"),
+            parent=house,
         )
 
         agent = Agent("Aileen", 22, kitchen, town)
@@ -140,14 +156,14 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertEqual(node.name.name, house.name.name)
 
     def test_single_node_tree(self):
-        town = Node(Location("town", "a quaint town"))
+        town = Node(Location("town", "town", "a quaint town"))
         agent = Agent("Aileen", 22, town, town)
         agent.set_destination_node(town)
         node = get_node_one_step_closer_to_destination(agent)
         self.assertTrue(isinstance(node, NoneType))
 
     def test_destination_none(self):
-        town = Node(Location("town", "a quaint town"))
+        town = Node(Location("town", "town", "a quaint town"))
         agent = Agent("Aileen", 22, town, town)
         agent.set_destination_node(None)
         node = get_node_one_step_closer_to_destination(agent)
@@ -156,16 +172,16 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
 class TestDeterminingDestination(unittest.TestCase):
     def test_can_determine_a_sandbox_object_node_destination_from_root(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where meals are cooked and eaten"),
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
             parent=house,
         )
 
         poster = Node(
             SandboxObject(
-                "poster", "a poster on the wall. The poster depicts guitars."
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
             ),
             parent=kitchen,
         )
@@ -188,16 +204,16 @@ class TestDeterminingDestination(unittest.TestCase):
 
 class TestMoveOneNodeCloserToDestination(unittest.TestCase):
     def test_location_displacement_when_agent_was_away_from_destination(self):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where meals are cooked and eaten"),
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
             parent=house,
         )
 
         poster = Node(
             SandboxObject(
-                "poster", "a poster on the wall. The poster depicts guitars."
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
             ),
             parent=kitchen,
         )
@@ -214,16 +230,16 @@ class TestMoveOneNodeCloserToDestination(unittest.TestCase):
     def test_location_displacement_to_sandbox_object_node_when_at_location_that_contains_it(
         self,
     ):
-        town = Node(Location("town", "a quaint town"))
-        house = Node(Location("house", "a two-story house"), parent=town)
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
         kitchen = Node(
-            Location("kitchen", "a place where meals are cooked and eaten"),
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
             parent=house,
         )
 
         poster = Node(
             SandboxObject(
-                "poster", "a poster on the wall. The poster depicts guitars."
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
             ),
             parent=kitchen,
         )

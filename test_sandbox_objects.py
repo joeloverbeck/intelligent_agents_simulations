@@ -7,6 +7,7 @@ class TestSandboxObjects(unittest.TestCase):
     def test_can_create_sandbox_object(self):
         sandbox_object = SandboxObject(
             "desk",
+            "desk",
             "a piece of furniture where people read, write, or sit at a computer",
         )
 

@@ -1,5 +1,9 @@
 {
     "Test":{
-        "age": 22
+        "age": 22,
+        "action_status": null,
+        "current_location_node": "town",
+        "destination_node": null,
+        "using_object": null
     }
 }
