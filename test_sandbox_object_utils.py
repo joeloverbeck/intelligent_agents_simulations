@@ -27,8 +27,10 @@ class TestRequestingAgentsRatingOfSandboxObject(unittest.TestCase):
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer"
         )
 
+        agent.set_planned_action("read and take notes for research paper", silent=True)
+
         rating = request_rating_from_agent_for_sandbox_object_node(
-            agent, "read and take notes for research paper", sandbox_object_node
+            agent, sandbox_object_node
         )
 
         self.assertTrue(isinstance(rating, int))

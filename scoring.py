@@ -4,33 +4,35 @@ from errors import InvalidParameterError
 from logging_messages import log_debug_message
 from regular_expression_utils import extract_rating_from_text
 from string_utils import end_string_with_period
-from wrappers import validate_agent_has_character_summary, validate_agent_type
+from wrappers import (
+    validate_agent_has_character_summary,
+    validate_agent_planned_action,
+    validate_agent_type,
+)
 
 
+@validate_agent_type
+@validate_agent_planned_action
 def determine_highest_scoring_node(
-    agent, action, set_of_nodes, request_rating_from_agent_for_node_function
+    agent, set_of_nodes, request_rating_from_agent_for_node_function
 ):
     scored_nodes = {}
 
     for node in set_of_nodes:
-        scored_nodes[node] = request_rating_from_agent_for_node_function(
-            agent, action, node
-        )
+        scored_nodes[node] = request_rating_from_agent_for_node_function(agent, node)
 
     # return the highest scoring node
     return max(scored_nodes, key=scored_nodes.get)
 
 
 @validate_agent_type
+@validate_agent_planned_action
 @validate_agent_has_character_summary
-def request_rating_from_agent_for_sandbox_object_node(
-    agent, action, sandbox_object_node
-):
+def request_rating_from_agent_for_sandbox_object_node(agent, sandbox_object_node):
     """Requests the rating from an agent for a sandbox object
 
     Args:
         agent (Agent): the agent from whom the rating is made
-        action (str): the action in natural English
         sandbox_object_node (Node): the sandbox object whose usefulness will be rated
 
     Raises:
@@ -50,7 +52,7 @@ def request_rating_from_agent_for_sandbox_object_node(
     prompt += "On the scale of 1 to 10, where 1 is useless (isn't related to the action) and 10 is essential (best possible object to fulfill the action),"
     prompt += f" determine how {agent.name} would rate how essential the {sandbox_object_node.name.name} "
     prompt += f"(located in {sandbox_object_node.parent.name.name}) is for the following action: "
-    prompt += f"{end_string_with_period(action)}\n"
+    prompt += f"{end_string_with_period(agent.get_planned_action())}\n"
     prompt += f"Rate how essential the {sandbox_object_node.name.name} is regarding the action above. Output a number from 1 to 10:"
 
     log_debug_message(f"{prompt}")
@@ -59,17 +61,17 @@ def request_rating_from_agent_for_sandbox_object_node(
 
     log_debug_message(f"{rating_response}")
 
-    return extract_rating_from_text(rating_response)
+    return extract_rating_from_text(rating_response, prompt)
 
 
 @validate_agent_type
+@validate_agent_planned_action
 @validate_agent_has_character_summary
-def request_rating_from_agent_for_location_node(agent, action, location_node):
+def request_rating_from_agent_for_location_node(agent, location_node):
     """Request the rating from agent for the location node.
 
     Args:
         agent (Agent): the agent for whom the rating will be made
-        action (str): the agent's action in plain English
         location_node (Node): the location node that will be rated
 
     Returns:
@@ -87,7 +89,7 @@ def request_rating_from_agent_for_location_node(agent, action, location_node):
         "* Prefer to stay in the current area if the activity can be done there.\n"
     )
     prompt += f"How absolutely necessary is the location {location_node.name.name} "
-    prompt += f"({location_node.name.description}) for {agent.name}'s action: {action}. Rate the location {location_node.name.name} "
+    prompt += f"({location_node.name.description}) for {agent.name}'s action: {agent.get_planned_action()}. Rate the location {location_node.name.name} "
     prompt += "for the action with a number in the range [1, 10]:"
 
     log_debug_message(f"{prompt}")
@@ -96,4 +98,4 @@ def request_rating_from_agent_for_location_node(agent, action, location_node):
 
     log_debug_message(f"{rating_response}")
 
-    return extract_rating_from_text(rating_response)
+    return extract_rating_from_text(rating_response, prompt)

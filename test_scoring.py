@@ -20,7 +20,9 @@ class TestRequestingRatingFromAgentForLocation(unittest.TestCase):
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer"
         )
 
-        rating = request_rating_from_agent_for_location_node(agent, plan, Node(bedroom))
+        agent.set_planned_action(plan, silent=True)
+
+        rating = request_rating_from_agent_for_location_node(agent, Node(bedroom))
 
         self.assertTrue(isinstance(rating, int))
         self.assertGreaterEqual(rating, 1)

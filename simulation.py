@@ -2,12 +2,24 @@
 
 """
 import datetime
-from action_statuses import produce_action_statuses_for_agent_and_sandbox_object
-from agent_utils import load_agents
+from action_statuses import (
+    determine_if_agent_will_use_sandbox_object,
+    produce_action_statuses_for_agent_and_sandbox_object,
+)
+from agent_utils import load_agents, save_agents_to_json, substitute_agent
 from character_summaries import request_character_summary
-from environment import load_environment_tree_from_json
+from environment import (
+    find_node_by_identifier,
+    load_environment_tree_from_json,
+    save_environment_tree_to_json,
+    substitute_node,
+)
+from errors import InvalidParameterError
 from initialization import set_initial_state_of_agent
+from logging_messages import log_simulation_message
+from navigation import perform_agent_movement
 from simulation_variables import load_simulation_variables
+from update_type import UpdateType
 
 
 class Simulation:
@@ -69,12 +81,13 @@ class Simulation:
         # We need to ensure that the memories of each agent exist. If they don't,
         # we need to try to generate them from the 'seed_memories.txt'
         for agent in self._agents:
-            set_initial_state_of_agent(
-                agent,
-                self.current_timestamp,
-                self._request_character_summary_function,
-                self._produce_action_statuses_for_agent_and_sandbox_object_function,
-            )
+            if agent.get_action_status() is None:
+                set_initial_state_of_agent(
+                    agent,
+                    self.current_timestamp,
+                    self._request_character_summary_function,
+                    self._produce_action_statuses_for_agent_and_sandbox_object_function,
+                )
 
     def get_environment_tree(self):
         """Returns the simulation's environment tree
@@ -100,7 +113,7 @@ class Simulation:
             "minutes_advanced_each_step"
         ]
 
-    def update(self, message: dict):
+    def update(self, update_message: dict):
         """Receives an update from an observed instance
 
         Args:
@@ -109,6 +122,70 @@ class Simulation:
         # There could be various types of messages sent.
         # Depending on the 'type' attribute of the dict, we'll know
         # what to do and what attributes the passed dict has.
+        if not isinstance(update_message, dict):
+            raise InvalidParameterError(
+                f"The function {self.update.__name__} expected 'message' to be a dict, but it was: {update_message}"
+            )
+
+        if update_message["type"] == UpdateType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS:
+            message = f"{self.current_timestamp.isoformat()} {update_message['sandbox_object'].name} "
+            message += f"changed action status to: {update_message['sandbox_object'].get_action_status()}"
+            log_simulation_message(self.name, message)
+
+            # Just in case there is some weird "value updated in agent's node but not in the simulation's" stuff going on,
+            # we exchange the node in the simulation for the one passed in this message.
+            substitute_node(self._environment_tree, update_message["sandbox_object"])
+            save_environment_tree_to_json(self.name, self._environment_tree)
+        elif update_message["type"] == UpdateType.AGENT_CHANGED_CURRENT_LOCATION_NODE:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} changed "
+            message += f"the current location node to: {update_message['agent'].get_current_location_node()}"
+            log_simulation_message(self.name, message)
+
+            substitute_agent(self._agents, update_message["agent"])
+            save_agents_to_json(self.name, self._agents)
+        elif update_message["type"] == UpdateType.AGENT_CHANGED_ACTION_STATUS:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} changed the action status to: {update_message['agent'].get_action_status()}"
+            log_simulation_message(self.name, message)
+
+            substitute_agent(self._agents, update_message["agent"])
+            save_agents_to_json(self.name, self._agents)
+        elif update_message["type"] == UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} changed the character "
+            message += f"summary to: {update_message['agent'].get_character_summary()}"
+            log_simulation_message(self.name, message)
+        elif update_message["type"] == UpdateType.AGENT_CHANGED_USING_OBJECT:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} changed using object to: {update_message['agent'].get_using_object()}"
+            log_simulation_message(self.name, message)
+
+            substitute_agent(self._agents, update_message["agent"])
+            save_agents_to_json(self.name, self._agents)
+        elif update_message["type"] == UpdateType.AGENT_CHANGED_DESTINATION_NODE:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} changed destination node to: {update_message['agent'].get_destination_node()}"
+            log_simulation_message(self.name, message)
+
+            substitute_agent(self._agents, update_message["agent"])
+            save_agents_to_json(self.name, self._agents)
+        elif update_message["type"] == UpdateType.AGENT_REACHED_DESTINATION:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} reached the destination: {update_message['destination_node'].name}"
+            log_simulation_message(self.name, message)
+        elif update_message["type"] == UpdateType.AGENT_PRODUCED_ACTION:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} produced action: {update_message['action']}"
+            log_simulation_message(self.name, message)
+        elif update_message["type"] == UpdateType.AGENT_NEEDS_TO_MOVE:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} needs to move to: {update_message['agent'].get_destination_node()}"
+            log_simulation_message(self.name, message)
+        elif update_message["type"] == UpdateType.AGENT_WILL_USE_SANDBOX_OBJECT:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} will use sandbox object: {update_message['agent'].get_current_location_node()}"
+            log_simulation_message(self.name, message)
+        elif update_message["type"] == UpdateType.AGENT_CHANGED_PLANNED_ACTION:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} changed planned action: {update_message['agent'].get_planned_action()}"
+            log_simulation_message(self.name, message)
+
+            substitute_agent(self._agents, update_message["agent"])
+            save_agents_to_json(self.name, self._agents)
+        elif update_message["type"] == UpdateType.AGENT_CONTINUES_USING_OBJECT:
+            message = f"{self.current_timestamp.isoformat()} {update_message['agent'].name} continues using object: {update_message['agent'].get_using_object()}"
+            log_simulation_message(self.name, message)
 
     def step(self):
         """Executes one step of the simulation, advancing in the process the current timestamp
@@ -117,3 +194,24 @@ class Simulation:
         self.current_timestamp = self.current_timestamp + datetime.timedelta(
             minutes=self._minutes_advanced_each_step
         )
+
+        for agent in self._agents:
+            # if the agent was moving, we gotta move the agent to the next node.
+            perform_agent_movement(agent)
+
+            # substitute the current_location_node of the agent by a fresh one from the environment tree,
+            # which presumably is updated
+            matching_node = find_node_by_identifier(
+                self._environment_tree,
+                agent.get_current_location_node().name.identifier,
+            )
+
+            substitute_node(agent.get_environment_tree(), matching_node.name)
+
+            # As long as the agent isn't already using an object, it must be checked if he or she should
+            if agent.get_using_object() is None and agent.get_planned_action() is not None:
+                determine_if_agent_will_use_sandbox_object(agent)
+            else:
+                agent.notify(
+                    {"type": UpdateType.AGENT_CONTINUES_USING_OBJECT, "agent": agent}
+                )

@@ -32,6 +32,18 @@ def fake_update_memories_database_function(
     pass
 
 
+def fake_request_what_action_to_take_now_function(
+    _agent, _current_timestamp, _most_recent_memories
+):
+    return "action to take"
+
+
+def fake_request_for_what_length_of_time_the_action_should_take_place_function(
+    _agent, _action, _current_timestamp, _most_recent_memories
+):
+    return "length of time"
+
+
 class TestCanCreateAgentAction(unittest.TestCase):
     def test_can_create_action_for_agent(self):
         agent = Agent("Aileen", 22, None, None)
@@ -47,6 +59,8 @@ class TestCanCreateAgentAction(unittest.TestCase):
             current_time,
             fake_load_agent_memories_function,
             fake_update_memories_database_function,
+            fake_request_what_action_to_take_now_function,
+            fake_request_for_what_length_of_time_the_action_should_take_place_function,
         )
 
         self.assertFalse(isinstance(action, NoneType))

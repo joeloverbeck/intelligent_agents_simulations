@@ -6,7 +6,7 @@ from regular_expression_utils import extract_rating_from_text
 class TestCanExtractImportanceFromText(unittest.TestCase):
     def test_can_extract_importance_from_text_that_has_number(self):
         text = "this text contains 7 a number somewhere."
-        importance = extract_rating_from_text(text)
+        importance = extract_rating_from_text(text, "prompt")
 
         self.assertEqual(importance, 7)
 

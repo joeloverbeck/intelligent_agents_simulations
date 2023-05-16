@@ -57,9 +57,15 @@ def try_to_get_a_response_from_gpt(prompt):
     if max_tokens is not None:
         request["max_tokens"] = max_tokens
 
-    response = requests.post(
-        api_endpoint, headers=headers, data=json.dumps(request), timeout=25
-    )
+    try:
+        response = requests.post(
+            api_endpoint, headers=headers, data=json.dumps(request), timeout=25
+        )
+    except requests.exceptions.ReadTimeout as exception:
+        log_debug_message(
+            f"Request to '{model}' failed due to ReadTimeout: {exception}"
+        )
+        return None
 
     if response.status_code == 200:
         return response.json()["choices"][0]["message"]["content"]

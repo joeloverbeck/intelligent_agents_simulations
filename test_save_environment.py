@@ -40,9 +40,9 @@ class TestLoadEnvironment(unittest.TestCase):
             parent=bedroom,
         )
 
-        json_str = serialize_environment_tree(town)
-
         full_path = "testing/serialize_environment_tree.json"
+
+        json_str = serialize_environment_tree(town)
 
         if os.path.isfile(full_path):
             os.remove(full_path)

@@ -16,6 +16,8 @@ def fake_create_action_function(
     current_timestamp,
     _load_agent_memories_function,
     _update_memories_database_function,
+    _request_what_action_to_take_now_function,
+    _request_for_what_length_of_time_the_action_should_take_place_function,
 ):
     return (
         f"{agent.name} is planning to cook a meal at {format_date(current_timestamp)}."
@@ -45,7 +47,7 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
         )
 
         def fake_determine_sandbox_object_destination_function(
-            _agent, _action, _environment_root
+            _agent, _environment_root
         ):
             return poster
 
@@ -86,7 +88,7 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
         )
 
         def fake_determine_sandbox_object_destination_function(
-            _agent, _action, _environment_root
+            _agent, _environment_root
         ):
             return poster
 

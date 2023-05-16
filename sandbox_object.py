@@ -4,6 +4,7 @@ that can be interactable in the simulation
 
 
 from errors import InvalidParameterError
+from update_type import UpdateType
 
 
 class SandboxObject:
@@ -32,13 +33,23 @@ class SandboxObject:
             "action_status": self._action_status,
         }
 
-    def set_action_status(self, action_status):
+    def set_action_status(self, action_status, silence=False):
         """Sets the action status of the sandbox object
 
         Args:
             action_status (str): the new action status for the sandbox object
         """
         self._action_status = action_status
+
+        # Note: set_action_status also gets called while building the environment tree.
+        # We don't want to notify anyone of that.
+        if not silence:
+            self._notify(
+                {
+                    "type": UpdateType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS,
+                    "sandbox_object": self,
+                }
+            )
 
     def get_action_status(self):
         """Returns the sandbox object's action status
@@ -49,13 +60,26 @@ class SandboxObject:
         return self._action_status
 
     def subscribe(self, observer):
+        """Allows an object to subscribe to this Agent
+
+        Args:
+            observer (Object): the instance that will subscribe to this instance
+        """
         if observer is not None:
             self._observers.append(observer)
 
-    def notify(self, message):
+    def _notify(self, message: dict):
+        """Notifies the subscribers of an update
+
+        Args:
+            message (dict): data relevant to the update
+
+        Raises:
+            InvalidParameterError: if the message passed is not a dict
+        """
         if not isinstance(message, dict):
             raise InvalidParameterError(
-                f"The function {self.notify.__name__} expected 'message' to be a dict, but it was: {message}"
+                f"The function {self._notify.__name__} expected 'message' to be a dict, but it was: {message}"
             )
 
         for observer in self._observers:

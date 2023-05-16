@@ -1,15 +1,28 @@
 """This module provides methods for determining action statuses of both agents and sandbox objects
 """
 from anytree import Node
+from actions import (
+    request_for_what_length_of_time_the_action_should_take_place,
+    request_what_action_to_take_now,
+)
+from agent import Agent
 from api_requests import request_response_from_ai_model
 from errors import AlgorithmError, InvalidParameterError
 from logging_messages import log_debug_message
+from navigation import determine_agent_destination_node
 from sandbox_object import SandboxObject
+from update_type import UpdateType
 from vector_storage import load_agent_memories, update_memories_database
-from wrappers import validate_agent_has_character_summary, validate_agent_type
+from wrappers import (
+    validate_agent_has_character_summary,
+    validate_agent_planned_action,
+    validate_agent_type,
+)
 
 
-def request_agent_action_status_for_using_object(agent, action):
+@validate_agent_type
+@validate_agent_planned_action
+def request_agent_action_status_for_using_object(agent):
     """Requests from the AI model what should be the agent's status given that he's using an object.
 
     Args:
@@ -18,7 +31,7 @@ def request_agent_action_status_for_using_object(agent, action):
     Returns:
         str: the agent's action status for using an object
     """
-    prompt = f"Write a summary of the action {action} in a single sentence:"
+    prompt = f"Write a summary of the action {agent.get_planned_action()} in a single sentence:"
 
     response = request_response_from_ai_model(prompt)
 
@@ -51,7 +64,9 @@ def request_used_object_action_status(agent):
         )
 
     prompt = f"Given the following action that {agent.name} is performing on {agent.get_using_object().name.name}:"
-    prompt += f" {agent.get_action_status()}. What should be the object's {agent.get_using_object().name.name} status now? Write it in a single sentence:"
+    prompt += f" {agent.get_action_status()}. How has the {agent.get_using_object().name.name}'s status changed? "
+    prompt += "For example: the state of a coffee machine would change from 'off' to 'brewing coffee'. "
+    prompt += f"Write the {agent.get_using_object().name.name}'s new status in a single sentence:"
 
     response = request_response_from_ai_model(prompt)
 
@@ -62,7 +77,9 @@ def request_used_object_action_status(agent):
     return response
 
 
-def produce_action_status_for_movement(agent, action):
+@validate_agent_type
+@validate_agent_planned_action
+def produce_action_status_for_movement(agent):
     """Produces an action status related to the need of the agent to move to another location.
 
     Args:
@@ -74,36 +91,123 @@ def produce_action_status_for_movement(agent, action):
     )
 
     agent.set_action_status(
-        f"{agent.name} is heading to use {agent.get_destination_node().name.name} "
+        f"{agent.name} is heading to use {agent.get_destination_node().name.name} ",
+        silent=True,
     )
     agent.set_action_status(
         agent.get_action_status()
-        + f"(located in {agent.get_destination_node().parent.name}), due to the following action: {action}"
+        + f"(located in {agent.get_destination_node().parent.name}), due to the following action: {agent.get_planned_action()}"
     )
 
     log_debug_message(f"{agent.name}: {agent.get_action_status()}")
 
 
-def determine_action_statuses_for_using_object(agent, destination_node, action):
-    """Determines the action statuses that will be set for both the agent and the object being used.
+@validate_agent_type
+@validate_agent_planned_action
+def determine_action_statuses_for_using_object(
+    agent: Agent,
+    request_agent_action_status_for_using_object_function,
+    request_used_object_action_status_function,
+):
+    """Determines the action statuses that will be set for using a sandbox object
 
     Args:
-        agent (Agent): the agent for whom the relevant action statuses will be created
-        destination_node (Node): the node to whom the agent will move
+        agent (Agent): the agent for whom the action status will be set
+        request_agent_action_status_for_using_object_function (function): the function that will request from the AI model the action status for using the sandbox object
+        request_used_object_action_status_function (function): the function that will request the action status for the sandbox object being used
+
+    Raises:
+        AlgorithmError: if the current location node of the agent doesn't contain a SandboxObject; this function shouldn't have been called in that case
     """
-    if not isinstance(destination_node, Node):
-        raise InvalidParameterError(
-            f"The function {determine_action_statuses_for_using_object.__name__} expected 'destination_node' to be a Node."
-        )
 
-    agent.set_using_object(destination_node)
+    # This function should never be called if the current location node isn't a SandboxObject
+    if not isinstance(agent.get_current_location_node().name, SandboxObject):
+        message_error = f"The function {determine_action_statuses_for_using_object.__name__} was called even though the agent's current location "
+        message_error += f"isn't a sandbox object: {agent.get_current_location_node()}"
+        raise AlgorithmError(message_error)
 
-    agent.set_action_status(request_agent_action_status_for_using_object(agent, action))
+    agent.set_using_object(agent.get_current_location_node())
+
+    agent.set_action_status(
+        request_agent_action_status_for_using_object_function(agent)
+    )
+
+    # One the agent has a status set, that agent is no longer "planning" an action.
+    agent.set_planned_action(None)
 
     # Should ask the AI model what happens to the state of the object
     agent.get_using_object().name.set_action_status(
-        request_used_object_action_status(agent)
+        request_used_object_action_status_function(agent)
     )
+
+
+@validate_agent_type
+@validate_agent_planned_action
+def determine_if_agent_will_use_sandbox_object(agent: Agent):
+    """Determines if the agent will use a sandbox object
+
+    Args:
+        agent (Agent): the agent for whom the determination will be made
+
+    Raises:
+        AlgorithmError: if the agent passed had a None current location node
+    """
+    # sanity check
+    if agent.get_current_location_node() is None:
+        raise AlgorithmError(
+            f"The function {determine_if_agent_will_use_sandbox_object.__name__} was called with an agent that didn't have a current location node set."
+        )
+
+    if isinstance(agent.get_current_location_node().name, SandboxObject):
+        agent.notify({"type": UpdateType.AGENT_WILL_USE_SANDBOX_OBJECT, "agent": agent})
+
+        # At this point, the agent does not have a destination, and is already able to start using the sandbox object
+        determine_action_statuses_for_using_object(
+            agent, request_used_object_action_status, request_used_object_action_status
+        )
+
+        # sanity check
+        if agent.get_action_status() is None:
+            error_message = f"The function {determine_if_agent_will_use_sandbox_object.__name___} was going to exit after establishing what object the agent was using, "
+            error_message += f"even though {agent.name}'s action status is None."
+            raise AlgorithmError(error_message)
+
+
+@validate_agent_type
+@validate_agent_planned_action
+@validate_agent_has_character_summary
+def produce_action_statuses_for_agent_based_on_destination_node(
+    agent: Agent, destination_node: Node
+):
+    """Produces action statuses for an agent based on the destination node passed
+
+    Args:
+        agent (Agent): the agent for whom the action statuses will be produced
+        destination_node (Node): the destination node, of type Node
+    """
+    # Now we have both the action and the destination node.
+    # If the destination node is the current node, the agent doesn't move.
+    determine_agent_destination_node(agent, destination_node)
+
+    # If at this point the agent still has a destination, then the action status should
+    # represent that.
+    if agent.get_destination_node() is not None:
+        agent.notify({"type": UpdateType.AGENT_NEEDS_TO_MOVE, "agent": agent})
+
+        produce_action_status_for_movement(agent)
+
+        return
+
+    determine_if_agent_will_use_sandbox_object(agent)
+
+    # Sanity check:
+    if (
+        agent.get_current_location_node() is not None
+        and agent.get_destination_node() is not None
+    ):
+        error_message = f"The function {produce_action_statuses_for_agent_based_on_destination_node.__name__} failed: it was going to end when the agent's "
+        error_message += f"current_location_node and destination_node were non-None: {agent.get_current_location_node()} | {agent.get_destination_node()}"
+        raise AlgorithmError(error_message)
 
 
 @validate_agent_type
@@ -123,39 +227,35 @@ def produce_action_statuses_for_agent_and_sandbox_object(
         determine_sandbox_object_destination_from_root_function (function): the function that determines what sandbox object gets used
     """
     action = create_action_function(
-        agent, current_timestamp, load_agent_memories, update_memories_database
+        agent,
+        current_timestamp,
+        load_agent_memories,
+        update_memories_database,
+        request_what_action_to_take_now,
+        request_for_what_length_of_time_the_action_should_take_place,
     )
+
+    agent.notify(
+        {"type": UpdateType.AGENT_PRODUCED_ACTION, "agent": agent, "action": action}
+    )
+
+    agent.set_planned_action(action)
 
     destination_node = determine_sandbox_object_destination_from_root_function(
-        agent, action, agent.get_environment_tree()
+        agent, agent.get_environment_tree()
     )
 
-    # Now we have both the action and the destination node.
-    # If the destination node is the current node, the agent doesn't move.
-    if destination_node == agent.get_current_location_node():
-        agent.set_destination_node(None)
-        log_debug_message(
-            f"{agent.name} is at destination {destination_node.name.name}."
-        )
-    else:
-        agent.set_destination_node(destination_node)
+    produce_action_statuses_for_agent_based_on_destination_node(agent, destination_node)
 
-    # If at this point the agent still has a destination, then the action status should
-    # represent that.
-    if agent.get_destination_node() is not None:
-        produce_action_status_for_movement(agent, action)
-
-        return
-
-    # At this point, the agent does not have a destination, and is already able to start using the sandbox object
-    determine_action_statuses_for_using_object(agent, destination_node, action)
-
-    # Sanity check:
+    # Sanity checks:
     if agent.get_action_status() is None:
         raise AlgorithmError(
             f"In the function {produce_action_statuses_for_agent_and_sandbox_object.__name__}, the agent's action status should be set at this point."
         )
-    if agent.get_using_object().name.get_action_status() is None:
-        raise AlgorithmError(
-            f"In the function {produce_action_statuses_for_agent_and_sandbox_object.__name__}, the used object's action status should be set at this point."
-        )
+
+    if agent.get_using_object() is not None:
+        # if the agent is using an object, the used object's action status should be set
+        if agent.get_using_object().name.get_action_status() is None:
+            raise AlgorithmError(
+                f"In the function {produce_action_statuses_for_agent_and_sandbox_object.__name__}, the used object's action status should be set at this point."
+            )

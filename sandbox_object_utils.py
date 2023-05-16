@@ -1,4 +1,6 @@
 import anytree
+from anytree import Node
+from agent import Agent
 from errors import InvalidParameterError
 
 from location import Location
@@ -7,7 +9,11 @@ from scoring import (
     determine_highest_scoring_node,
     request_rating_from_agent_for_sandbox_object_node,
 )
-from wrappers import validate_agent_has_character_summary, validate_agent_type
+from wrappers import (
+    validate_agent_has_character_summary,
+    validate_agent_planned_action,
+    validate_agent_type,
+)
 
 
 def find_all_sandbox_objects_in_environment_tree(environment_tree):
@@ -27,8 +33,21 @@ def find_all_sandbox_objects_in_environment_tree(environment_tree):
 
 
 @validate_agent_type
+@validate_agent_planned_action
 @validate_agent_has_character_summary
-def determine_sandbox_object_node_to_use(agent, action, location_node):
+def determine_sandbox_object_node_to_use(agent: Agent, location_node: Node):
+    """Determines the sandbox object node that the agent should use
+
+    Args:
+        agent (Agent): the agent for whom the determination will be made
+        location_node (Node): the location node, which should contain a Location type
+
+    Raises:
+        InvalidParameterError: if location_node doesn't contain a Location type
+
+    Returns:
+        Node: the sandbox object at the Location type node with the highest score, as given by the AI model
+    """
     if not isinstance(location_node.name, Location):
         raise InvalidParameterError(
             f"The function {determine_sandbox_object_node_to_use.__name__} expected 'location_node' to be a node that contains a Location, but it was: {location_node}"
@@ -41,7 +60,6 @@ def determine_sandbox_object_node_to_use(agent, action, location_node):
 
     highest_scoring_node = determine_highest_scoring_node(
         agent,
-        action,
         all_sandbox_objects_in_location,
         request_rating_from_agent_for_sandbox_object_node,
     )

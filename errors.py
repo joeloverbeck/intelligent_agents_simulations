@@ -30,6 +30,10 @@ class DatabaseDoesntExistError(Exception):
     pass
 
 
+class UnableToSaveVectorDatabaseError(Exception):
+    pass
+
+
 class UnableToConnectWithAiModelError(Exception):
     pass
 

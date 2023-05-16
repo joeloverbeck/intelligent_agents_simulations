@@ -102,6 +102,9 @@ def request_character_summary(agent, current_timestamp, memories_raw_data, index
         index,
     )
 
+    # careful with these. Try to close index always when you're not using it.
+    index.unload()
+
     summary_description = f"Name: {agent.name} (age: {agent.age})\n"
     summary_description += f"Innate traits: {innate_traits}\n"
     summary_description += (

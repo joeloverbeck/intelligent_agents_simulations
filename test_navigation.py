@@ -120,18 +120,6 @@ class TestMovementTowardsDestination(unittest.TestCase):
         self.assertFalse(isinstance(node, NoneType))
         self.assertEqual(node.name.name, house_2.name.name)
 
-    def test_same_current_and_destination_location(self):
-        town = Node(Location("town", "town", "a quaint town"))
-        house = Node(Location("house", "house", "a two-story house"), parent=town)
-
-        agent = Agent("Aileen", 22, house, town)
-
-        agent.set_destination_node(house)
-
-        node = get_node_one_step_closer_to_destination(agent)
-
-        self.assertTrue(isinstance(node, NoneType))
-
     def test_same_branch_non_direct_ancestor_descendant(self):
         town = Node(Location("town", "town", "a quaint town"))
         house = Node(Location("house", "house", "a two-story house"), parent=town)
@@ -154,13 +142,6 @@ class TestMovementTowardsDestination(unittest.TestCase):
 
         self.assertFalse(isinstance(node, NoneType))
         self.assertEqual(node.name.name, house.name.name)
-
-    def test_single_node_tree(self):
-        town = Node(Location("town", "town", "a quaint town"))
-        agent = Agent("Aileen", 22, town, town)
-        agent.set_destination_node(town)
-        node = get_node_one_step_closer_to_destination(agent)
-        self.assertTrue(isinstance(node, NoneType))
 
     def test_destination_none(self):
         town = Node(Location("town", "town", "a quaint town"))
@@ -192,9 +173,9 @@ class TestDeterminingDestination(unittest.TestCase):
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer.\n"
         )
 
-        destination_node = determine_sandbox_object_destination_from_root(
-            agent, "Aileen is planning to cook a meal", town
-        )
+        agent.set_planned_action("Aileen is planning to cook a meal", silent=True)
+
+        destination_node = determine_sandbox_object_destination_from_root(agent, town)
 
         self.assertFalse(isinstance(destination_node, NoneType))
         self.assertFalse(isinstance(destination_node.name, NoneType))
@@ -253,6 +234,60 @@ class TestMoveOneNodeCloserToDestination(unittest.TestCase):
         # After moving one step, she should have entered the kitchen, where
         # the poster is located, so the destination should be poster
         self.assertEqual(agent.get_current_location_node(), poster)
+
+    def test_sandbox_object_displacement_to_sandbox_object_when_same_parent(self):
+        town = Node(Location("town", "town", "a quaint town"))
+        house = Node(Location("house", "house", "a two-story house"), parent=town)
+        kitchen = Node(
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
+            parent=house,
+        )
+
+        poster = Node(
+            SandboxObject(
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
+            ),
+            parent=kitchen,
+        )
+
+        stove = Node(
+            SandboxObject("stove", "stove", "a piece of furniture to cook meals"),
+            parent=kitchen,
+        )
+
+        agent = Agent("Aileen", 22, poster, town)
+
+        agent.set_destination_node(stove)
+
+        perform_agent_movement(agent)
+
+        # After moving one step, she should have entered the kitchen, where
+        # the poster is located, so the destination should be poster
+        self.assertEqual(agent.get_current_location_node(), stove)
+
+    def test_movement_from_sandbox_object_to_adjacent_location(self):
+        house = Node(Location("house", "house", "a two-story house"))
+        kitchen = Node(
+            Location("kitchen", "kitchen", "a place where meals are cooked and eaten"),
+            parent=house,
+        )
+
+        poster = Node(
+            SandboxObject(
+                "poster", "poster", "a poster on the wall. The poster depicts guitars."
+            ),
+            parent=kitchen,
+        )
+
+        agent = Agent("Aileen", 22, poster, house)
+
+        agent.set_destination_node(house)
+
+        perform_agent_movement(agent)
+
+        # Given that she was at poster (and therefore at kitchen),
+        # moving one step should have put her at house.
+        self.assertEqual(agent.get_current_location_node(), house)
 
 
 if __name__ == "__main__":

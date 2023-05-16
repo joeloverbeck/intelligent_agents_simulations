@@ -20,6 +20,7 @@ from errors import (
     DatabaseDoesntExistError,
     DisparityBetweenDatabasesError,
     FailedToDeleteFileError,
+    UnableToSaveVectorDatabaseError,
 )
 from math_utils import calculate_recency, normalize_value
 from regular_expression_utils import extract_rating_from_text
@@ -68,14 +69,16 @@ def create_memory_dictionary(memory_description, current_timestamp):
     )
 
     importance_prompt = "On the scale of 1 to 10, where 1 is purely mundane (e.g., brushing teeth, making bed) "
-    importance_prompt += "and 10 is extremely poignant (e.g., a break up, college acceptance), rate the likely poignancy "
+    importance_prompt += "and 10 is extremely poignant (e.g., a break up, college acceptance), rate the likely importance "
     importance_prompt += "of the following piece of memory."
     importance_prompt += f" Memory: {memory_description}"
     importance_prompt += "\nRating: <fill in>."
 
     importance_response = request_response_from_ai_model(importance_prompt)
 
-    extracted_importance = extract_rating_from_text(importance_response)
+    extracted_importance = extract_rating_from_text(
+        importance_response, importance_prompt
+    )
 
     normalized_importance = normalize_value(extracted_importance)
 
@@ -99,7 +102,14 @@ def create_vectorized_memory(memory_description, current_timestamp, index):
 
 def create_vector_database(database_filename, new_index):
     new_index.build(NUMBER_OF_TREES)
-    new_index.save(database_filename)
+
+    try:
+        new_index.save(database_filename)
+    except OSError as exception:
+        message_error = f"The function {create_vector_database.__name__} was unable to save the database at {database_filename}."
+        message_error += f" Error: {exception}"
+
+        raise UnableToSaveVectorDatabaseError(message_error) from exception
 
 
 def create_json_file(json_filename, raw_text_mapping):
@@ -119,6 +129,31 @@ def ensure_parity_between_databases(memories_raw_data, index):
         )
 
 
+def append_to_previous_json_memories_if_necessary(json_filename, memories):
+    """This function will prevent squashing the previous json memories file
+    if one exists, because it will load the contents of that file
+    and add the new memories to that raw mapping.
+
+    Args:
+        json_filename (str): the full path to the json file
+        memories (dict): new memories that need to be saved to disk
+
+    Returns:
+        dict: either the original memories or the previous memories + the new ones
+    """
+    # Remember to load all the memories in the json file,
+    # or else you'll just overwrite the file with "create_json_file"
+    if os.path.isfile(json_filename):
+        raw_text_mapping = load_contents_of_json_file(json_filename)
+
+        for index, entry in memories.items():
+            raw_text_mapping[index] = entry
+
+        return raw_text_mapping
+
+    return memories
+
+
 @validate_agent_type
 def save_memories(agent, current_timestamp, new_memories, new_index):
     memories = {}
@@ -134,6 +169,9 @@ def save_memories(agent, current_timestamp, new_memories, new_index):
     json_filename = get_json_filename(agent)
 
     create_vector_database(database_filename, new_index)
+
+    memories = append_to_previous_json_memories_if_necessary(json_filename, memories)
+
     create_json_file(json_filename, memories)
 
     # ensure that there is parity between the length of both the json
@@ -214,15 +252,3 @@ def load_agent_memories(agent):
     memories_raw_data = format_json_memory_data_for_python(memories_raw_data)
 
     return index, memories_raw_data
-
-
-def load_index_items_into_new_index(index, metric):
-    new_index = create_new_index(metric)
-
-    for i in range(index.get_n_items()):
-        new_index.add_item(i, index.get_item_vector(i))
-
-    # Vital to unload the original index, which should free up the database file.
-    index.unload()
-
-    return new_index

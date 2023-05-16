@@ -37,8 +37,10 @@ class TestDetermineSandboxObjectForAction(unittest.TestCase):
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer.\n"
         )
 
+        agent.set_planned_action("Aileen is going to cook breakfast", silent=True)
+
         sandbox_object_node_chosen = determine_sandbox_object_node_to_use(
-            agent, "Aileen is going to cook breakfast", kitchen
+            agent, kitchen
         )
 
         self.assertEqual(sandbox_object_node_chosen, stove)

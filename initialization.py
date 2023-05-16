@@ -33,6 +33,9 @@ def set_initial_state_of_agent(
         )
     )
 
+    # be always careful to unload index when not using it
+    index.unload()
+
     produce_action_statuses_for_agent_and_sandbox_object_function(
         agent,
         current_timestamp,

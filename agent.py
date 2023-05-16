@@ -2,7 +2,8 @@
 
 """
 from anytree import Node
-from errors import InvalidParameterError, MissingCharacterSummaryError
+from errors import AlgorithmError, InvalidParameterError, MissingCharacterSummaryError
+from update_type import UpdateType
 
 
 class Agent:
@@ -14,6 +15,8 @@ class Agent:
 
         self._environment_tree = environment_tree
         self._current_location_node = current_location_node
+
+        self._planned_action = None
         self._action_status = None
         self._destination_node = None
         self._using_object = None
@@ -50,6 +53,14 @@ class Agent:
 
         self._current_location_node = current_location_node
 
+        # Needs to notify the update
+        self.notify(
+            {
+                "type": UpdateType.AGENT_CHANGED_CURRENT_LOCATION_NODE,
+                "agent": self,
+            }
+        )
+
     def get_current_location_node(self):
         """Retrieves the agent's current location node
 
@@ -58,13 +69,40 @@ class Agent:
         """
         return self._current_location_node
 
-    def set_action_status(self, action_status):
+    def set_planned_action(self, planned_action: str, silent=False):
+        """Sets the planned action for the agent
+
+        Args:
+            planned_action (str): the planned action, in natural English
+            silent (bool, optional): if silent, the update won't be notified to subscribers. Defaults to False.
+        """
+        self._planned_action = planned_action
+
+        if not silent:
+            # needs to notify about the update
+            self.notify(
+                {"type": UpdateType.AGENT_CHANGED_PLANNED_ACTION, "agent": self}
+            )
+
+    def get_planned_action(self):
+        """Returns the agent's planned action
+
+        Returns:
+            str: the agent's planned action
+        """
+        return self._planned_action
+
+    def set_action_status(self, action_status, silent=False):
         """Sets the agent's action status
 
         Args:
             action_status (str): the action status for the agent
         """
         self._action_status = action_status
+
+        if not silent:
+            # needs to notify about the update.
+            self.notify({"type": UpdateType.AGENT_CHANGED_ACTION_STATUS, "agent": self})
 
     def get_action_status(self):
         """Returns the agent's action status
@@ -82,13 +120,20 @@ class Agent:
         """
         self._character_summary = character_summary
 
-    def set_using_object(self, sandbox_object_node):
+        # Needs to notify of this update
+        self.notify({"type": UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY, "agent": self})
+
+    def set_using_object(self, sandbox_object_node, silent=False):
         """Sets the object node that the agent will be marked as using.
 
         Args:
             sandbox_object_node (Node): the sandbox object node that the agent will be marked as using
         """
         self._using_object = sandbox_object_node
+
+        if not silent:
+            # notify of this change
+            self.notify({"type": UpdateType.AGENT_CHANGED_USING_OBJECT, "agent": self})
 
     def get_using_object(self):
         """Returns the agent's 'using_object' value
@@ -126,13 +171,33 @@ class Agent:
 
         return self._character_summary
 
-    def set_destination_node(self, node):
-        """Sets the destination node of the agent.
+    def set_destination_node(self, node: Node, silent=False):
+        """Sets the destination node of the agent
 
         Args:
-            node (Node): the node that will be set as the destination node
+            node (Node): the node that will be set as the destination node of the agent
+            silent (bool, optional): if silent, this update won't be notified to subscribers. Defaults to False.
+
+        Raises:
+            AlgorithmError: if the node attempted to set as destination node would be the same as the current location node
         """
+        # Note: if the destination node about to be set is equal to the
+        # current location node, that should never happen
+        if node is not None:
+            if self._current_location_node.name == node.name:
+                error_message = (
+                    f"Was going to set the node {node} as the destination node, "
+                )
+                error_message += f"even though it's the same as the current location node: {self._current_location_node}"
+                raise AlgorithmError(error_message)
+
         self._destination_node = node
+
+        if not silent:
+            # notify of this change
+            self.notify(
+                {"type": UpdateType.AGENT_CHANGED_DESTINATION_NODE, "agent": self}
+            )
 
     def get_destination_node(self):
         """Retrieves the agent's destination node
@@ -151,7 +216,15 @@ class Agent:
         if observer is not None:
             self._observers.append(observer)
 
-    def notify(self, message):
+    def notify(self, message: dict):
+        """Notifies the subscribers of an update
+
+        Args:
+            message (dict): data relevant to the update
+
+        Raises:
+            InvalidParameterError: if the message passed is not a dict
+        """
         if not isinstance(message, dict):
             raise InvalidParameterError(
                 f"The function {self.notify.__name__} expected 'message' to be a dict, but it was: {message}"
@@ -159,6 +232,27 @@ class Agent:
 
         for observer in self._observers:
             observer.update(message)
+
+    def to_dict(self):
+        """Converts an instance of this class into a dict for serialization
+
+        Returns:
+            dict: the dict version of an instance of this class
+        """
+        return {
+            "age": self.age,
+            "planned_action": self._planned_action,
+            "action_status": self._action_status,
+            "current_location_node": self._current_location_node.name.identifier
+            if self._current_location_node
+            else None,
+            "destination_node": self._destination_node.name.identifier
+            if self._destination_node
+            else None,
+            "using_object": self._using_object.name.identifier
+            if self._using_object
+            else None,
+        }
 
     def __str__(self):
         return f"Agent: {self.name} ({self.age}) | Current location: {self._current_location_node.name.name}"

@@ -3,7 +3,7 @@ import re
 from errors import log_error
 
 
-def extract_rating_from_text(text):
+def extract_rating_from_text(text, prompt_that_originated_text):
     """Extracts a rating from 1 to 10 from a text.
     Note: if no rating is found in the text, a 5 is returned.
 
@@ -21,8 +21,11 @@ def extract_rating_from_text(text):
 
     # If at this point we haven't found a number, then the AI has responded
     # some nonsense. Log it and return 5.
-    log_error(
-        f"ERROR: Function {extract_rating_from_text.__name__}, the text should have contained a number, but it was: {text}"
+    error_message = f"ERROR: Function {extract_rating_from_text.__name__}, the text should have contained a number, but it was: {text} "
+    error_message += (
+        f"The prompt that generated this error: {prompt_that_originated_text}"
     )
+
+    log_error(error_message)
 
     return 5

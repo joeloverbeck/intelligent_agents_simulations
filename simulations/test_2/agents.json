@@ -1,16 +1,18 @@
 {
     "Test 1":{
         "age": 22,
-        "action_status": null,
-        "current_location_node": "town",
+        "planned_action": null,
+        "action_status": "reading",
+        "current_location_node": "park",
         "destination_node": null,
-        "using_object": null
+        "using_object": "bench"
     },
     "Test 2":{
         "age": 32,
-        "action_status": null,
+        "planned_action": null,
+        "action_status": "heading to house",
         "current_location_node": "town",
-        "destination_node": null,
+        "destination_node": "house",
         "using_object": null
     }
 }
