@@ -5,7 +5,7 @@ from agent import Agent
 from memories_querying import update_most_recent_access_timestamps
 
 
-def fake_load_contents_of_json_file_function(json_filename):
+def fake_load_contents_of_json_file_function(_json_filename):
     return {
         "0": {
             "description": "Description 1",

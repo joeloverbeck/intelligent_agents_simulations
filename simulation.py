@@ -2,6 +2,7 @@
 
 """
 import datetime
+import os
 from action_statuses import (
     determine_if_agent_will_use_sandbox_object,
     produce_action_statuses_for_agent_and_sandbox_object,
@@ -14,11 +15,11 @@ from environment import (
     save_environment_tree_to_json,
     substitute_node,
 )
-from errors import InvalidParameterError
+from errors import DirectoryDoesntExistError, InvalidParameterError
 from initialization import set_initial_state_of_agent
 from logging_messages import log_simulation_message
 from navigation import perform_agent_movement
-from simulation_variables import load_simulation_variables
+from simulation_variables import load_simulation_variables, save_current_timestamp
 from update_type import UpdateType
 
 
@@ -27,6 +28,12 @@ class Simulation:
 
     def __init__(self, name):
         self.name = name
+
+        # Crash directly if the appropriate directory for the simulation doesn't exist.
+        simulation_path = f"simulations/{self.name.lower()}"
+
+        if not os.path.exists(simulation_path):
+            raise DirectoryDoesntExistError(f"The directory '{simulation_path}' does not exist.")
 
         self._environment_tree = None
         self._agents = []
@@ -194,6 +201,8 @@ class Simulation:
         self.current_timestamp = self.current_timestamp + datetime.timedelta(
             minutes=self._minutes_advanced_each_step
         )
+
+        save_current_timestamp(self.name, self.current_timestamp)
 
         for agent in self._agents:
             # if the agent was moving, we gotta move the agent to the next node.

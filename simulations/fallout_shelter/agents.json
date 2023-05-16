@@ -1,10 +1,1 @@
-{
-    "Gormunguss": {
-        "age": 38,
-        "planned_action": null,
-        "action_status": "The guitar's status remains unchanged as it is simply being used for a new purpose.",
-        "current_location_node": "guitar",
-        "destination_node": null,
-        "using_object": "guitar"
-    }
-}
+{"Gormunguss": {"age": 38, "planned_action": null, "action_status": "The crop of corn's new status is \"ready for harvest\".", "current_location_node": "corn_crop", "destination_node": null, "using_object": "corn_crop"}}
