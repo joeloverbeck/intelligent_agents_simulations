@@ -1,5 +1,5 @@
 # AI agents for simulations (LLM-based)
-A Python project that uses LLMs to simulate intelligence in virtual agents.
+A Python project that uses LLMs to simulate intelligence in virtual agents. Based on [this paper](https://arxiv.org/abs/2304.03442).
 
 ## Instructions
 **1)** Install the requirements of the repository:
