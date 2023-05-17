@@ -15,22 +15,41 @@ def bfs(current_location: Node, destination: Node):
         Node: The next node on the shortest path from the current location to the destination, or None if no path exists.
     """
     visited = set()
-    queue = deque([(current_location, [])])
+    queue = deque([(current_location, None)])  # Storing the node and its predecessor
+
+    # Creating a dictionary to store the predecessor of each node
+    predecessors = {}
 
     while queue:
-        node, path = queue.popleft()
+        node, predecessor = queue.popleft()
+
         if node not in visited:
             visited.add(node)
+            predecessors[node] = predecessor  # Storing the predecessor of the node
+
             if node == destination:
+                path = []
+
+                # Reconstruct the path by tracing back through the predecessors
+                while node is not None:
+                    path.append(node)
+                    node = predecessors[node]
+
+                # The path is from destination to start, so we reverse it
+                path = path[::-1]
+
                 # Return the second node in the path, which is the next step from the current location
                 return path[1] if len(path) > 1 else None
+
             # Add the node's children to the queue
             for child in node.children:
                 if child not in visited:
-                    queue.append((child, path + [node, child]))
+                    queue.append((child, node))
+
             # If the node has a parent and it's not in visited, add it to the queue
             if node.parent is not None and node.parent not in visited:
-                queue.append((node.parent, path + [node, node.parent]))
+                queue.append((node.parent, node))
+
     return None  # Return None if no path exists
 
 

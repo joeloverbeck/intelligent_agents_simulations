@@ -18,13 +18,15 @@ def fake_produce_action_statuses_for_agent_and_sandbox_object_function(
     _current_timestamp,
     _create_action_function,
     _determine_sandbox_object_destination_from_root_function,
+    _produce_action_statuses_for_agent_based_on_destination_node_function,
+    _request_what_action_to_take_now_function,
+    _request_for_what_length_of_time_the_action_should_take_place_function
 ):
     pass
 
 
 class TestSimulation(unittest.TestCase):
     def test_can_create_simulation(self):
-        comparison_time = datetime.datetime(2023, 5, 12, 10, 55, 45)
 
         simulation = Simulation("test_1")
 

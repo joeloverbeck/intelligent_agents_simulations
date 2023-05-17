@@ -7,7 +7,6 @@ from memories_querying import get_most_recent_memories
 from string_utils import end_string_with_period
 from wrappers import (
     validate_agent_has_character_summary,
-    validate_agent_planned_action,
     validate_agent_type,
 )
 

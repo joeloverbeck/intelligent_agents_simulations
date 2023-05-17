@@ -15,7 +15,7 @@
                     "name": "tools",
                     "description": "lots of tools for farming",
                     "type": "SandboxObject",
-                    "action_status": "The tools' status remains unchanged.",
+                    "action_status": "idle",
                     "children": []
                 }
             ]
@@ -85,7 +85,7 @@
                             "name": "fridge",
                             "description": "an appliance that keeps food cold",
                             "type": "SandboxObject",
-                            "action_status": "The fridge's status has not changed.",
+                            "action_status": "idle",
                             "children": []
                         }
                     ]

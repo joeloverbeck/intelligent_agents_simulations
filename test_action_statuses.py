@@ -24,6 +24,24 @@ def fake_create_action_function(
     )
 
 
+def fake_request_what_action_to_take_now_function(
+    _agent, _current_timestamp, _most_recent_memories
+):
+    return "Action to take"
+
+
+def fake_request_for_what_length_of_time_the_action_should_take_place_function(
+    _agent, _action, _current_timestamp, _most_recent_memories
+):
+    return "30 minutes from 10 am"
+
+
+def fake_produce_action_statuses_for_agent_based_on_destination_node_function(
+    agent, _destination_node
+):
+    agent.set_action_status("action status", silent=True)
+
+
 class TestDetermineActionStatusesForAction(unittest.TestCase):
     def test_can_produce_movement_action_status_if_not_at_destination(self):
         town = Node(Location("town", "town", "a quaint town"))
@@ -58,6 +76,9 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
             current_timestamp,
             fake_create_action_function,
             fake_determine_sandbox_object_destination_function,
+            fake_produce_action_statuses_for_agent_based_on_destination_node_function,
+            fake_request_what_action_to_take_now_function,
+            fake_request_for_what_length_of_time_the_action_should_take_place_function,
         )
 
         self.assertFalse(isinstance(agent.get_action_status(), NoneType))
@@ -99,6 +120,9 @@ class TestDetermineActionStatusesForAction(unittest.TestCase):
             current_timestamp,
             fake_create_action_function,
             fake_determine_sandbox_object_destination_function,
+            fake_produce_action_statuses_for_agent_based_on_destination_node_function,
+            fake_request_what_action_to_take_now_function,
+            fake_request_for_what_length_of_time_the_action_should_take_place_function,
         )
 
         self.assertFalse(isinstance(agent.get_action_status(), NoneType))

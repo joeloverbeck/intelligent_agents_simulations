@@ -217,6 +217,9 @@ def produce_action_statuses_for_agent_and_sandbox_object(
     current_timestamp,
     create_action_function,
     determine_sandbox_object_destination_from_root_function,
+    produce_action_statuses_for_agent_based_on_destination_node_function,
+    request_what_action_to_take_now_function,
+    request_for_what_length_of_time_the_action_should_take_place_function,
 ):
     """Produces action statuses for a agent and for the sandbox object involved if it's used.
 
@@ -231,8 +234,8 @@ def produce_action_statuses_for_agent_and_sandbox_object(
         current_timestamp,
         load_agent_memories,
         update_memories_database,
-        request_what_action_to_take_now,
-        request_for_what_length_of_time_the_action_should_take_place,
+        request_what_action_to_take_now_function,
+        request_for_what_length_of_time_the_action_should_take_place_function,
     )
 
     agent.notify(
@@ -245,7 +248,7 @@ def produce_action_statuses_for_agent_and_sandbox_object(
         agent, agent.get_environment_tree()
     )
 
-    produce_action_statuses_for_agent_based_on_destination_node(agent, destination_node)
+    produce_action_statuses_for_agent_based_on_destination_node_function(agent, destination_node)
 
     # Sanity checks:
     if agent.get_action_status() is None:
