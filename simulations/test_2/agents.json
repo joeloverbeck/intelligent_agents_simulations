@@ -5,7 +5,9 @@
         "action_status": "reading",
         "current_location_node": "park",
         "destination_node": null,
-        "using_object": "bench"
+        "using_object": "bench",
+        "is_player": "false",
+        "character_summary": "false"
     },
     "Test 2":{
         "age": 32,
@@ -13,6 +15,8 @@
         "action_status": "heading to house",
         "current_location_node": "town",
         "destination_node": "house",
-        "using_object": null
+        "using_object": null,
+        "is_player": "false",
+        "character_summary": null
     }
 }

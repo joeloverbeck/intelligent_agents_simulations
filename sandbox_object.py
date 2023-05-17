@@ -41,7 +41,7 @@ class SandboxObject:
     def get_identifier(self):
         return self._identifier
 
-    def set_action_status(self, action_status, silence=False):
+    def set_action_status(self, action_status, silent=False):
         """Sets the action status of the sandbox object
 
         Args:
@@ -51,7 +51,7 @@ class SandboxObject:
 
         # Note: set_action_status also gets called while building the environment tree.
         # We don't want to notify anyone of that.
-        if not silence:
+        if not silent:
             self._notify(
                 {
                     "type": UpdateType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS,

@@ -2,6 +2,7 @@
 
 """
 from anytree import Node
+from api_requests import request_response_from_ai_model
 from environment_tree_integrity import calculate_number_of_nodes_in_tree
 from errors import AlgorithmError, InvalidParameterError, MissingCharacterSummaryError
 from update_type import UpdateType
@@ -35,8 +36,11 @@ class Agent:
         self._action_status = None
         self._destination_node = None
         self._using_object = None
+        self._is_player = False
 
         self._character_summary = None
+
+        self._request_response_function = request_response_from_ai_model
 
         self._observers = []
 
@@ -168,16 +172,12 @@ class Agent:
         return self._using_object
 
     def has_character_summary(self):
-        """Determines whether or not the agent has a character summary set.
+        """Returns whether or not the agent has the agent summary set
 
         Returns:
-            bool: True if the character summary is set, False otherwise
+            bool: whether or not the agent has the character summary set
         """
-
-        if self._character_summary is None:
-            return False
-
-        return True
+        return self._character_summary is not None
 
     def get_character_summary(self):
         """Returns the agent's character summary.
@@ -231,6 +231,38 @@ class Agent:
         """
         return self._destination_node
 
+    def set_is_player(self, is_player: bool):
+        """Sets whether or not the agent is a player.
+
+        Args:
+            is_player (bool): whether or not the agent is a player
+        """
+        self._is_player = is_player
+
+    def get_is_player(self):
+        """Returns whether or not the agent is a player
+
+        Returns:
+            bool: whether or not the agent is a player
+        """
+        return self._is_player
+
+    def set_request_response_function(self, request_response_function):
+        """Sets the request response function
+
+        Args:
+            request_response_function (function): the request response function
+        """
+        self._request_response_function = request_response_function
+
+    def get_request_response_function(self):
+        """Returns the request response function of the agent
+
+        Returns:
+            function: the agent's request response function
+        """
+        return self._request_response_function
+
     def subscribe(self, observer):
         """Allows an object to subscribe to this Agent
 
@@ -276,6 +308,8 @@ class Agent:
             "using_object": self._using_object.name.get_identifier()
             if self._using_object
             else None,
+            "is_player": "true" if self._is_player else "false",
+            "character_summary": self._character_summary,
         }
 
     def __str__(self):

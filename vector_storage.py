@@ -5,7 +5,7 @@ import json
 import os
 
 from annoy import AnnoyIndex
-from api_requests import request_response_from_ai_model
+from agent import Agent
 from defines import (
     DECAY_RATE,
     MODEL,
@@ -39,7 +39,20 @@ def insert_text_in_vector_index(text, index):
     return vector_index
 
 
-def create_memory_dictionary(memory_description, current_timestamp):
+@validate_agent_type
+def create_memory_dictionary(
+    agent: Agent, memory_description: str, current_timestamp: datetime.datetime
+):
+    """Creates a memory dict for the memory description passed
+
+    Args:
+        agent (Agent): the agent to whom the memory belongs
+        memory_description (str): the description of the memory
+        current_timestamp (datetime): the current timestamp
+
+    Returns:
+        dict: the data asociated with the memory, to store in a json file
+    """
     most_recent_access_timestamp = current_timestamp
 
     recency = calculate_recency(
@@ -52,7 +65,7 @@ def create_memory_dictionary(memory_description, current_timestamp):
     importance_prompt += f" Memory: {memory_description}"
     importance_prompt += "\nRating: <fill in>."
 
-    importance_response = request_response_from_ai_model(importance_prompt)
+    importance_response = agent.get_request_response_function()(importance_prompt)
 
     extracted_importance = extract_rating_from_text(
         importance_response, importance_prompt
@@ -70,10 +83,26 @@ def create_memory_dictionary(memory_description, current_timestamp):
     }
 
 
-def create_vectorized_memory(memory_description, current_timestamp, index):
+def create_vectorized_memory(
+    agent: Agent,
+    memory_description: str,
+    current_timestamp: datetime.datetime,
+    index: AnnoyIndex,
+):
+    """Creates a vectorized memory of a memory description
+
+    Args:
+        agent (Agent): the agent to whom the memory belongs
+        memory_description (str): the description of the memory, in natural English
+        current_timestamp (datetime): the current timestamp
+        index (AnnoyIndex): the index of the 'annoy' library
+
+    Returns:
+        AnnoyIndex, dict: the index of the vector database, as well as a dict with the json-ready data of the memory
+    """
     vector_index = insert_text_in_vector_index(memory_description, index)
 
-    memory = create_memory_dictionary(memory_description, current_timestamp)
+    memory = create_memory_dictionary(agent, memory_description, current_timestamp)
 
     return vector_index, memory
 
@@ -138,7 +167,7 @@ def save_memories(agent, current_timestamp, new_memories, new_index):
 
     for memory_description in new_memories:
         vector_index, memory = create_vectorized_memory(
-            memory_description, current_timestamp, new_index
+            agent, memory_description, current_timestamp, new_index
         )
 
         memories.update({vector_index: memory})

@@ -176,3 +176,17 @@ def request_response_from_ai_model(prompt):
             return response
 
     return try_to_get_a_response_from_oobabooga(prompt)
+
+
+def request_response_from_human(prompt: str):
+    """Requests a response from a human, instead of from an AI model.
+
+    Args:
+        prompt (str): the prompt that will be sent to the player.
+
+    Returns:
+        str: the player's input
+    """
+    # init(autoreset=True)
+    # print(Fore.GREEN +  + Fore.RED + "Answer: ", end="")
+    return input(f"\n--> INPUT FROM HUMAN NEEDED <--\n\n{prompt}\nAnswer: ")

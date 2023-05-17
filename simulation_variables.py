@@ -28,7 +28,7 @@ def load_simulation_variables(simulation_name):
     return data
 
 
-def save_current_timestamp(simulation_name: str, current_timestamp: datetime):
+def save_current_timestamp(simulation_name: str, current_timestamp: datetime.datetime):
     """Saves the current timestamp of a simulation to the corresponding 'variables.json' file
 
     Args:

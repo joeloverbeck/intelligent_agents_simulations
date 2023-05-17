@@ -1,4 +1,3 @@
-from api_requests import request_response_from_ai_model
 from defines import NUMBER_OF_RESULTS_FOR_QUERY
 from logging_messages import log_debug_message
 from memories_querying import (
@@ -41,7 +40,7 @@ def generate_summary_description_segment(
 
     log_debug_message(f"{prompt}")
 
-    return request_response_from_ai_model(prompt)
+    return agent.get_request_response_function()(prompt)
 
 
 @validate_agent_type

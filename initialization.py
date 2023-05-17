@@ -15,7 +15,7 @@ from agent import Agent
 @validate_agent_type
 def set_initial_state_of_agent(
     agent: Agent,
-    current_timestamp: datetime,
+    current_timestamp: datetime.datetime,
     request_character_summary_function,
     produce_action_statuses_for_agent_and_sandbox_object_function,
 ):
@@ -32,11 +32,13 @@ def set_initial_state_of_agent(
     # Load the memories to create the character summary of the agent.
     index, memories_raw_data = load_agent_memories(agent)
 
-    agent.set_character_summary(
-        request_character_summary_function(
-            agent, current_timestamp, memories_raw_data, index
+    # set the character summary of the agent as long as it is None
+    if not agent.has_character_summary():
+        agent.set_character_summary(
+            request_character_summary_function(
+                agent, current_timestamp, memories_raw_data, index
+            )
         )
-    )
 
     # be always careful to unload index when not using it
     index.unload()

@@ -5,6 +5,8 @@
         "action_status": null,
         "current_location_node": "town",
         "destination_node": null,
-        "using_object": null
+        "using_object": null,
+        "is_player": "false",
+        "character_summary": null
     }
 }

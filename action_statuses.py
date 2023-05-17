@@ -2,7 +2,7 @@
 """
 from anytree import Node
 from agent import Agent
-from api_requests import request_response_from_ai_model
+from environment import save_environment_tree_to_json
 from errors import AlgorithmError, InvalidParameterError
 from logging_messages import log_debug_message
 from navigation import determine_agent_destination_node
@@ -29,7 +29,7 @@ def request_agent_action_status_for_using_object(agent):
     """
     prompt = f"Write a summary of the action {agent.get_planned_action()} in a single sentence:"
 
-    response = request_response_from_ai_model(prompt)
+    response = agent.get_request_response_function()(prompt)
 
     log_debug_message(f"Agent {agent.name} --> Action Status: {response}")
 
@@ -64,7 +64,7 @@ def request_used_object_action_status(agent):
     prompt += "For example: the state of a coffee machine would change from 'off' to 'brewing coffee'. "
     prompt += f"Write the {agent.get_using_object().name.name}'s new status in a single sentence:"
 
-    response = request_response_from_ai_model(prompt)
+    response = agent.get_request_response_function()(prompt)
 
     log_debug_message(
         f"Object being used: {agent.get_using_object().name.name} --> Action status: {response}"
@@ -102,13 +102,16 @@ def produce_action_status_for_movement(agent):
 @validate_agent_planned_action
 def determine_action_statuses_for_using_object(
     agent: Agent,
+    simulation_name: str,
     request_agent_action_status_for_using_object_function,
     request_used_object_action_status_function,
+    save_environment_tree_to_json_function
 ):
     """Determines the action statuses that will be set for using a sandbox object
 
     Args:
         agent (Agent): the agent for whom the action status will be set
+        simulation_name (str): the name of the simulation in which the agent is involved
         request_agent_action_status_for_using_object_function (function): the function that will request from the AI model the action status for using the sandbox object
         request_used_object_action_status_function (function): the function that will request the action status for the sandbox object being used
 
@@ -136,14 +139,18 @@ def determine_action_statuses_for_using_object(
         request_used_object_action_status_function(agent)
     )
 
+    # The state of the object has changed. The agent's environment tree needs to be saved to a file.
+    save_environment_tree_to_json_function(simulation_name, f"{agent.name}_environment", agent.get_environment_tree())
+
 
 @validate_agent_type
 @validate_agent_planned_action
-def determine_if_agent_will_use_sandbox_object(agent: Agent):
+def determine_if_agent_will_use_sandbox_object(agent: Agent, simulation_name: str):
     """Determines if the agent will use a sandbox object
 
     Args:
         agent (Agent): the agent for whom the determination will be made
+        simulation_name (str): the name of the simulation in which the agent is involved
 
     Raises:
         AlgorithmError: if the agent passed had a None current location node
@@ -160,8 +167,10 @@ def determine_if_agent_will_use_sandbox_object(agent: Agent):
         # At this point, the agent does not have a destination, and is already able to start using the sandbox object
         determine_action_statuses_for_using_object(
             agent,
+            simulation_name,
             request_agent_action_status_for_using_object,
             request_used_object_action_status,
+            save_environment_tree_to_json
         )
 
         # sanity check

@@ -5,8 +5,6 @@ Returns:
 """
 from sentence_transformers import SentenceTransformer
 
-from wrappers import validate_agent_type
-
 MODEL = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
 VECTOR_DIMENSIONS = 384
@@ -44,7 +42,6 @@ def get_seed_memories_filename(agent):
     return f"agents/{agent.name.lower()}/seed_memories.txt"
 
 
-@validate_agent_type
 def get_database_filename(agent):
     """Returns the full path of the vector database.
 
@@ -57,7 +54,6 @@ def get_database_filename(agent):
     return f"agents/{agent.name.lower()}/memory_stream.ann"
 
 
-@validate_agent_type
 def get_json_filename(agent):
     """Returns the full path of the json file that contains or will contain an agent's memories.
 

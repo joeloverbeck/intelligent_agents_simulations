@@ -1,16 +1,14 @@
 import json
-from anytree import Node
+from api_requests import request_response_from_human
 from environment import find_node_by_identifier, load_environment_tree_from_json
 from errors import AlgorithmError
 from file_utils import ensure_full_file_path_exists
 from agent import Agent
-from substitute_node import substitute_node
 from vector_storage import create_json_file
-from wrappers import validate_agent_type
 
 
 def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, observer):
-    """Loads into an instante of Agent the proper attribute values from the raw data
+    """Loads into an instance of Agent the proper attribute values from the raw data
 
     Args:
         key (str): the name of the agent
@@ -26,7 +24,9 @@ def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, obser
     current_location_node = None
 
     # load the individual environment tree from the corresponding file
-    agent_environment_tree = load_environment_tree_from_json(simulation_name, f"{key.lower()}_environment", observer)
+    agent_environment_tree = load_environment_tree_from_json(
+        simulation_name, f"{key.lower()}_environment", observer
+    )
 
     if agents_data[key]["current_location_node"] is not None:
         current_location_node = find_node_by_identifier(
@@ -60,6 +60,20 @@ def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, obser
 
         agent.set_destination_node(destination_node, silent=True)
 
+    # check whether or not the agent is a player
+    if agents_data[key]["is_player"] is not None:
+        if agents_data[key]["is_player"].lower() == "true":
+            agent.set_is_player(True)
+        else:
+            agent.set_is_player(False)
+
+    if agent.get_is_player():
+        agent.set_request_response_function(request_response_from_human)
+
+    # check the character summary
+    if agents_data[key]["character_summary"] is not None:
+        agent.set_character_summary(agents_data[key]["character_summary"])
+
     agent.subscribe(observer)
 
     return agent
@@ -82,7 +96,9 @@ def load_agents(simulation_name, observer):
     agents = []
 
     for key in agents_data.keys():
-        agent = load_agent_attributes_from_raw_data(key, agents_data, simulation_name, observer)
+        agent = load_agent_attributes_from_raw_data(
+            key, agents_data, simulation_name, observer
+        )
 
         agents.append(agent)
 
@@ -109,26 +125,6 @@ def substitute_agent(agents, agent):
         raise AlgorithmError(error_message) from exception
 
     agents[index] = agent
-
-
-@validate_agent_type
-def update_agent_current_location_node_from_environment_tree(
-    agent: Agent, environment_tree: Node
-):
-    """Updates an agent's current location node from another environment tree
-
-    Args:
-        agent (Agent): the agent whose current location node will be updated
-        environment_tree (Node): the other environment tree from which a matching node will be retrieved
-    """
-    matching_node = find_node_by_identifier(
-        environment_tree,
-        agent.get_current_location_node().name.get_identifier(),
-    )
-
-    agent.set_environment_tree(
-        substitute_node(agent.get_environment_tree(), matching_node.name)
-    )
 
 
 def save_agents_to_json(simulation_name: str, agents: list):

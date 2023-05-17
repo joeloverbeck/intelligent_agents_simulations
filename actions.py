@@ -1,5 +1,4 @@
 from agent_utils import wipe_previous_action_attribute_values_from_agent
-from api_requests import request_response_from_ai_model
 from datetime_utils import format_date
 from defines import NUMBER_OF_RESULTS_FOR_QUERY
 from logging_messages import log_debug_message
@@ -33,7 +32,7 @@ def request_what_action_to_take_now(agent, current_timestamp, most_recent_memori
     prompt += f"Now it is {format_date(current_timestamp)}. Decide what single action {agent.name} should take right now. "
     prompt += f"Format: {agent.name} is going to <action>"
 
-    return request_response_from_ai_model(prompt)
+    return agent.get_request_response_function()(prompt)
 
 
 @validate_agent_type
@@ -62,7 +61,7 @@ def request_for_what_length_of_time_the_action_should_take_place(
     prompt += f"Now it is {format_date(current_timestamp)}. {agent.name} is planning to take the following action: {end_string_with_period(action)}.\n"
     prompt += "For how many minutes should this action take place?"
 
-    return request_response_from_ai_model(prompt)
+    return agent.get_request_response_function()(prompt)
 
 
 @validate_agent_type

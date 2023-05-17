@@ -1,6 +1,5 @@
 from anytree import Node
 from agent import Agent
-from api_requests import request_response_from_ai_model
 from errors import InvalidParameterError
 from logging_messages import log_debug_message
 from regular_expression_utils import extract_rating_from_text
@@ -62,7 +61,7 @@ def request_rating_from_agent_for_sandbox_object_node(agent, sandbox_object_node
 
     log_debug_message(f"{prompt}")
 
-    rating_response = request_response_from_ai_model(prompt)
+    rating_response = agent.get_request_response_function()(prompt)
 
     log_debug_message(f"{rating_response}")
 
@@ -89,7 +88,7 @@ def request_rating_from_agent_for_location_node(agent, location_node):
 
     # Create the prompt to send to the AI model
     prompt = agent.get_character_summary() + "\n"
-    prompt = f"{agent.name} is currently in {location_node.name}.\n"
+    prompt = f"{agent.name} is currently in {agent.get_current_location_node().name.name} ({agent.get_current_location_node().name.description}).\n"
     prompt += (
         "* Prefer to stay in the current area if the activity can be done there.\n"
     )
@@ -99,7 +98,7 @@ def request_rating_from_agent_for_location_node(agent, location_node):
 
     log_debug_message(f"{prompt}")
 
-    rating_response = request_response_from_ai_model(prompt)
+    rating_response = agent.get_request_response_function()(prompt)
 
     log_debug_message(f"{rating_response}")
 

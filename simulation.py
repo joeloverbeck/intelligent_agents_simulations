@@ -12,10 +12,10 @@ from agent_utils import (
     load_agents,
     save_agents_to_json,
     substitute_agent,
-    update_agent_current_location_node_from_environment_tree,
 )
 from character_summaries import request_character_summary
 from environment import (
+    find_node_by_identifier,
     load_environment_tree_from_json,
     save_environment_tree_to_json,
 )
@@ -24,8 +24,9 @@ from errors import AlgorithmError, DirectoryDoesntExistError, InvalidParameterEr
 from initialization import set_initial_state_of_agent
 from logging_messages import log_simulation_message
 from navigation import perform_agent_movement
+from sandbox_object import SandboxObject
 from simulation_variables import load_simulation_variables, save_current_timestamp
-from substitute_node import substitute_node
+from update_location_in_environment_tree import update_node_in_environment_tree
 from update_type import UpdateType
 
 
@@ -92,7 +93,9 @@ class Simulation:
         """Initializes the simulation"""
         self._load_simulation_variables()
 
-        self._environment_tree = self._load_environment_function(self.name, "environment", self)
+        self._environment_tree = self._load_environment_function(
+            self.name, "environment", self
+        )
 
         self._number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(
             self._environment_tree
@@ -173,21 +176,20 @@ class Simulation:
         save_current_timestamp(self.name, self.current_timestamp)
 
         for agent in self._agents:
-            # if the agent was moving, we gotta move the agent to the next node.
+            # If the agent was moving, we gotta move the agent to the next node.
             perform_agent_movement(agent)
 
-            # substitute the current_location_node of the agent by a fresh one from the environment tree,
-            # which presumably is updated
-            update_agent_current_location_node_from_environment_tree(
-                agent, self.get_environment_tree()
-            )
+            # After the movement, the agent should have its current location updated
+            # with the matching node values of the simulation's environment tree
+            matching_node = find_node_by_identifier(self.get_environment_tree(), agent.get_current_location_node().name.get_identifier())
+            update_node_in_environment_tree(matching_node, agent.get_environment_tree())
 
-            # As long as the agent isn't already using an object, it must be checked if he or she should
+            # As long as the agent isn't already using an object, it must be checked if he or she should use one.
             if (
                 agent.get_using_object() is None
                 and agent.get_planned_action() is not None
             ):
-                determine_if_agent_will_use_sandbox_object(agent)
+                determine_if_agent_will_use_sandbox_object(agent, self.name)
             else:
                 agent.notify(
                     {"type": UpdateType.AGENT_CONTINUES_USING_OBJECT, "agent": agent}
@@ -195,18 +197,18 @@ class Simulation:
 
 
 def handle_case_sandbox_object_changed_action_status(simulation, update_message):
+    if not isinstance(update_message['sandbox_object'], SandboxObject):
+        error_message = f"The function {handle_case_sandbox_object_changed_action_status} received a supposed sandbox object that wasn't one: "
+        error_message += f"{update_message['sandbox_object']}"
+        raise AlgorithmError(error_message)
+
     message = f"{simulation.current_timestamp.isoformat()} {update_message['sandbox_object'].name} "
     message += f"changed action status to: {update_message['sandbox_object'].get_action_status()}"
     log_simulation_message(simulation.name, message)
 
-    # Just in case there is some weird "value updated in agent's node but not in the simulation's" stuff going on,
-    # we exchange the node in the simulation for the one passed in this message.
-    simulation.set_environment_tree(
-        substitute_node(
-            simulation.get_environment_tree(), update_message["sandbox_object"]
-        )
-    )
-    save_environment_tree_to_json(simulation.name, simulation.get_environment_tree())
+    # Update the data of the corresponding sandbox object in the main environment tree
+    update_node_in_environment_tree(Node(update_message['sandbox_object']), simulation.get_environment_tree())
+    save_environment_tree_to_json(simulation.name, "environment", simulation.get_environment_tree())
 
 
 def handle_case_agent_changed_current_location_node(simulation, update_message):

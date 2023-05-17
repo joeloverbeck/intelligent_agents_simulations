@@ -5,6 +5,8 @@
         "action_status": "The crop of corn's new status is \"ready for harvest\".",
         "current_location_node": "corn_crop",
         "destination_node": null,
-        "using_object": "corn_crop"
+        "using_object": "corn_crop",
+        "is_player": "false",
+        "character_summary": null
     }
 }
