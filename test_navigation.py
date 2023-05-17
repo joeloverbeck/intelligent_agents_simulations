@@ -7,9 +7,9 @@ from agent import Agent
 from location import Location
 from navigation import (
     determine_sandbox_object_destination_from_root,
-    get_node_one_step_closer_to_destination,
     perform_agent_movement,
 )
+from one_step_movement import get_node_one_step_closer_to_destination
 from sandbox_object import SandboxObject
 from sandbox_object_utils import find_all_sandbox_objects_in_environment_tree
 

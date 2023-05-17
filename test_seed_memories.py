@@ -1,6 +1,8 @@
 import unittest
 
+from anytree import Node
 from agent import Agent
+from location import Location
 from seed_memories import load_seed_memories
 
 
@@ -8,7 +10,9 @@ class TestCanLoadSeedMemoriesFromFile(unittest.TestCase):
     def setUp(self):
         agent_name = "Test"
 
-        agent = Agent(agent_name, 22, None, None)
+        town = Node(Location("town", "town", "town"))
+
+        agent = Agent(agent_name, 22, town, town)
 
         self.seed_memories_cleaned = load_seed_memories(agent)
 

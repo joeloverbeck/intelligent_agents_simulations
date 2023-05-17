@@ -1,4 +1,5 @@
 from anytree import Node
+from agent import Agent
 from api_requests import request_response_from_ai_model
 from errors import InvalidParameterError
 from logging_messages import log_debug_message
@@ -14,8 +15,12 @@ from wrappers import (
 @validate_agent_type
 @validate_agent_planned_action
 def determine_highest_scoring_node(
-    agent, set_of_nodes, request_rating_from_agent_for_node_function
+    agent: Agent, set_of_nodes: tuple, request_rating_from_agent_for_node_function
 ):
+    # if 'set_of_nodes' contains only one node, return it immediately
+    if len(set_of_nodes) == 1:
+        return set_of_nodes[0]
+
     scored_nodes = {}
 
     for node in set_of_nodes:

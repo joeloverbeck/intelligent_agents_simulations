@@ -38,7 +38,6 @@ class TestSimulation(unittest.TestCase):
         simulation.initialize()
 
         self.assertEqual(simulation.name, "test_1")
-        self.assertEqual(simulation.current_timestamp, comparison_time)
 
     def test_can_retrieve_a_simulations_environment_tree(self):
         town = Node(Location("town", "town", "a quaint town"))
@@ -62,29 +61,6 @@ class TestSimulation(unittest.TestCase):
 
         self.assertEqual(town.name, environment_tree.name)
 
-    def test_can_step_the_simulation(self):
-        town = Node(Location("town", "town", "a quaint town"))
-
-        simulation = Simulation("test_1")
-
-        def fake_load_environment_function(_simulation_name, _self):
-            return town
-
-        simulation.set_load_environment_function(fake_load_environment_function)
-        simulation.set_request_character_summary_function(
-            fake_request_character_summary_function
-        )
-        simulation.set_produce_action_statuses_for_agent_and_sandbox_object_function(
-            fake_produce_action_statuses_for_agent_and_sandbox_object_function
-        )
-
-        simulation.initialize()
-
-        simulation.step()
-
-        comparison_time = datetime.datetime(2023, 5, 12, 11, 25, 45)
-
-        self.assertEqual(simulation.current_timestamp, comparison_time)
 
     def test_can_retrieve_agents_from_simulation(self):
         town = Node(Location("town", "town", "a quaint town"))

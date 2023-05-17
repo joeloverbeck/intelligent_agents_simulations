@@ -21,7 +21,9 @@ class TestRequestingAgentsRatingOfSandboxObject(unittest.TestCase):
 
         self.assertEqual(sandbox_object.name, "desk")
 
-        agent = Agent("Eileen", 22, None, None)
+        town = Node(Location("town", "town", "town"))
+
+        agent = Agent("Eileen", 22, town, town)
 
         agent.set_character_summary(
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer"

@@ -8,13 +8,14 @@ import requests
 from defines import (
     INSTRUCT_GPT_PROMPT_ANSWER_OPENING,
     INSTRUCT_GPT_PROMPT_HEADER,
-    INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING,
-    INSTRUCT_WIZARDLM_PROMPT_HEADER,
+    INSTRUCT_VICUNA_1_1_PROMPT_ANSWER_OPENING,
+    INSTRUCT_VICUNA_1_1_PROMPT_HEADER,
     USE_GPT,
 )
 
 from errors import UnableToConnectWithAiModelError
 from logging_messages import log_debug_message
+from regular_expression_utils import remove_end_tag_from_ai_response
 
 
 def try_to_get_a_response_from_gpt(prompt):
@@ -112,11 +113,7 @@ def try_to_get_a_response_from_oobabooga(prompt):
     host = "localhost:5000"
     uri = f"http://{host}/api/v1/generate"
 
-    prompt = (
-        INSTRUCT_WIZARDLM_PROMPT_HEADER
-        + prompt
-        + INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING
-    )
+    prompt = f"{INSTRUCT_VICUNA_1_1_PROMPT_HEADER}{prompt}{INSTRUCT_VICUNA_1_1_PROMPT_ANSWER_OPENING}"
 
     request_for_oobabooga = {
         "prompt": prompt,
@@ -153,7 +150,7 @@ def try_to_get_a_response_from_oobabooga(prompt):
     if response.status_code == 200:
         result = response.json()["results"][0]["text"]
 
-        return result.strip()
+        return remove_end_tag_from_ai_response(result.strip())
 
     return None
 

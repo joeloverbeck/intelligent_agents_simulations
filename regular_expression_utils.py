@@ -3,7 +3,7 @@ import re
 from errors import log_error
 
 
-def extract_rating_from_text(text, prompt_that_originated_text):
+def extract_rating_from_text(text, prompt_that_originated_text, silent=False):
     """Extracts a rating from 1 to 10 from a text.
     Note: if no rating is found in the text, a 5 is returned.
 
@@ -26,6 +26,12 @@ def extract_rating_from_text(text, prompt_that_originated_text):
         f"The prompt that generated this error: {prompt_that_originated_text}"
     )
 
-    log_error(error_message)
+    if not silent:
+        log_error(error_message)
 
     return 5
+
+
+def remove_end_tag_from_ai_response(text):
+    pattern = '</s>$'
+    return re.sub(pattern, '', text)

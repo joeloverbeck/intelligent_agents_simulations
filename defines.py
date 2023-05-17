@@ -21,6 +21,10 @@ SCORE_GAMMA = 1.0
 INSTRUCT_WIZARDLM_PROMPT_HEADER = ""
 INSTRUCT_WIZARDLM_PROMPT_ANSWER_OPENING = "\n### Response:"
 
+INSTRUCT_VICUNA_1_1_PROMPT_HEADER = "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers "
+INSTRUCT_VICUNA_1_1_PROMPT_HEADER += "to the user's questions.\n\nUSER: "
+INSTRUCT_VICUNA_1_1_PROMPT_ANSWER_OPENING = "\nASSISTANT: "
+
 INSTRUCT_GPT_PROMPT_HEADER = "Question. "
 INSTRUCT_GPT_PROMPT_ANSWER_OPENING = " Answer:"
 

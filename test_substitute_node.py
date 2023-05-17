@@ -1,11 +1,10 @@
 import unittest
 
-from environment import substitute_node
-
 from anytree import Node
 
 from location import Location
 from sandbox_object import SandboxObject
+from substitute_node import substitute_node
 
 
 class TestSubstituteNode(unittest.TestCase):
@@ -40,7 +39,7 @@ class TestSubstituteNode(unittest.TestCase):
 
         substitute_bedroom = Location("bedroom", "bedroomy", "new description")
 
-        substitute_node(town, substitute_bedroom)
+        town = substitute_node(town, substitute_bedroom)
 
         self.assertEqual(len(house.children), 2)
 
@@ -51,6 +50,20 @@ class TestSubstituteNode(unittest.TestCase):
 
         self.assertEqual(substitution_bedroom.children[0].name.name, "bed")
 
+    def test_can_substitute_root_node_correctly(self):
+
+        plot_of_land = Node(Location("plot_of_land", "plot of land", "a plot of land with a farmhouse and some crops"))
+
+        Node(Location("farmhouse", "farmhouse", "a three-story farmhouse"), parent=plot_of_land)
+        Node(Location("barn", "barn", "a big, bulky barn"), parent=plot_of_land)
+        Node(Location("field", "field", "a field with multiple crops"), parent=plot_of_land)
+
+        plot_of_land = substitute_node(plot_of_land, Location("plot_of_land", "new plot of land", "a new plot of land"))
+
+        self.assertEqual(plot_of_land.name.name, "new plot of land")
+        self.assertEqual(plot_of_land.name.description, "a new plot of land")
+
+        self.assertEqual(len(plot_of_land.children), 3)
 
 if __name__ == "__main__":
     unittest.main()

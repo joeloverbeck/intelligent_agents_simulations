@@ -5,6 +5,7 @@ from agent import Agent
 from errors import AlgorithmError
 from location import Location
 from logging_messages import log_debug_message
+from one_step_movement import get_node_one_step_closer_to_destination
 
 from sandbox_object import SandboxObject
 from sandbox_object_utils import node_children_contain_sandbox_object
@@ -20,49 +21,6 @@ from wrappers import (
     validate_agent_type,
 )
 
-
-@validate_agent_type
-def get_node_one_step_closer_to_destination(agent):
-    """Returns the node one step closer from the agent's current location to the destination.
-    Note: it can return None if no next step exists (such as when the agent is already at destination.)
-
-    Args:
-        agent (Agent): the agent whose route this function will track.
-
-    Returns:
-        Node: the node one step closer to the agent's destination
-    """
-    current_location = agent.get_current_location_node()
-    destination = agent.get_destination_node()
-
-    # If the current_location and destination are the same, we return None;
-    # there is no next node in the route
-    if current_location == destination:
-        return None
-
-    # If there is no destination, there is no next node.
-    if destination is None:
-        return None
-
-    # If the current location is a descendant of the destination, move up the tree
-    if current_location in destination.descendants:
-        return current_location.parent
-
-    # If the current location is an ancestor of the destination, move down the tree
-    if current_location in destination.ancestors:
-        # Find the child of the current location that is also an ancestor of the destination
-        for child in current_location.children:
-            if child in destination.path:
-                return child
-
-    # If the current location is neither a descendant nor an ancestor of the destination,
-    # this means they are on separate branches. In this case, move one step up the tree.
-    else:
-        return current_location.parent
-
-    raise AlgorithmError(
-        f"The function {get_node_one_step_closer_to_destination.__name__} reached the end of the function without returning a valid value."
-    )
 
 
 @validate_agent_type
@@ -160,7 +118,7 @@ def move_agent_immediately_to_containing_location_if_necessary(agent: Agent):
 
 
 def crash_if_next_node_closer_to_destination_is_none(
-    next_node_closer_to_destination: Node,
+    next_node_closer_to_destination: Node, agent: Agent
 ):
     """Crashes if the next node closer to destination is None, because that calculation
     shouldn't have been made if the agent was already at the destination,
@@ -173,8 +131,9 @@ def crash_if_next_node_closer_to_destination_is_none(
         AlgorithmError: if the next_node_closer_to_destination is None
     """
     if next_node_closer_to_destination is None:
-        error_message = f"The function {perform_agent_movement.__name__} was about to set a current location node None to an agent. "
-        error_message += "That likely means that there's a discrepancy with the 'environment.json' regarding the locations and sandbox objects the agent knows."
+        error_message = f"The function {perform_agent_movement.__name__} was about to set a current location node None to an agent."
+        error_message += f"\nAgent's current location node: {agent.get_current_location_node()}. Destination node: {agent.get_destination_node()}"
+        error_message += f"\nAgent's environment tree: {agent.get_environment_tree()}"
         raise AlgorithmError(error_message)
 
 
@@ -225,13 +184,13 @@ def perform_agent_movement(agent: Agent):
         # Agent is already at destination. No movement is needed.
         agent.set_destination_node(None)
         return
-
+    
     move_agent_immediately_to_containing_location_if_necessary(agent)
 
     next_node_closer_to_destination = get_node_one_step_closer_to_destination(agent)
 
     # Note, the current location node should never be none.
-    crash_if_next_node_closer_to_destination_is_none(next_node_closer_to_destination)
+    crash_if_next_node_closer_to_destination_is_none(next_node_closer_to_destination, agent)
 
     agent.set_current_location_node(next_node_closer_to_destination)
 

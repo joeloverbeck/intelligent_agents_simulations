@@ -1,9 +1,11 @@
 import datetime
+from anytree import Node
 from types import NoneType
 import unittest
 from actions import create_action
 
 from agent import Agent
+from location import Location
 
 
 def fake_load_agent_memories_function(_agent):
@@ -46,7 +48,9 @@ def fake_request_for_what_length_of_time_the_action_should_take_place_function(
 
 class TestCanCreateAgentAction(unittest.TestCase):
     def test_can_create_action_for_agent(self):
-        agent = Agent("Aileen", 22, None, None)
+        town = Node(Location("town", "town", "town"))
+
+        agent = Agent("Aileen", 22, town, town)
 
         agent.set_character_summary(
             f"Name: {agent.name} (age: {agent.age})\nInnate traits: shy, studious, creative, wannabe-singer.\n"

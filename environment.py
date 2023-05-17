@@ -3,13 +3,14 @@
 import json
 import os
 
-from anytree import Node, find
+from anytree import find, Node
 from errors import AlgorithmError, InvalidParameterError
 from file_utils import ensure_full_file_path_exists
 from location import Location
 
 from sandbox_object import SandboxObject
 from vector_storage import create_json_file
+
 
 
 def find_node_by_identifier(root_node, identifier):
@@ -23,7 +24,7 @@ def find_node_by_identifier(root_node, identifier):
         Node: the node that contains either a Location or SandboxObject that has the passed identifier
     """
     try:
-        matching_node = find(root_node, lambda node: node.name.identifier == identifier)
+        matching_node = find(root_node, lambda node: node.name.get_identifier() == identifier)
     except AttributeError as exception:
         error_message = (
             f"In the function {find_node_by_identifier.__name__}, the code was unable "
@@ -73,52 +74,6 @@ def build_environment_tree(node_data, observer, parent=None):
 
     return node
 
-
-def substitute_node(environment_tree: Node, new_object):
-    """Substitutes a matching node in an environment tree for a new object,
-    which may be a Location or a SandboxObject.
-
-    Args:
-        environment_tree (Node): the environment tree where the matching object will be substituted
-        new_object (Location or SandboxObject): the location or sandbox object that will be wrapped in a Node and inserted into the environment tree
-
-    Raises:
-        InvalidParameterError: if the function received a None environment tree
-        InvalidParameterError: if the function received a None new_object
-        InvalidParameterError: if new_object was neither a Location nor a SandboxObject
-        AlgorithmError: if the algorithm was unable to find a matching node in the environment tree, which should be impossible
-    """
-    if environment_tree is None:
-        raise InvalidParameterError(
-            f"The function {substitute_node.__name__} received a None environment tree."
-        )
-    if new_object is None:
-        raise InvalidParameterError(
-            f"The function {substitute_node.__name__} expected the 'new_object' not to be None."
-        )
-    if not isinstance(new_object, Location) and not isinstance(
-        new_object, SandboxObject
-    ):
-        raise InvalidParameterError(
-            f"The function {substitute_node.__name__} expected the 'new_object' to be either a Location or a SandboxObject. It was: {new_object}"
-        )
-
-    matching_node = find_node_by_identifier(environment_tree, new_object.identifier)
-
-    if matching_node is None:
-        raise AlgorithmError(
-            f"Was unable to find a matching node in {substitute_node.__name__}. This should be impossible."
-        )
-
-    new_node = Node(new_object)
-
-    # Steal the children of the matching node
-    for child in list(matching_node.children):
-        child.parent = new_node
-
-    # Steal the parent of the matching node
-    new_node.parent = matching_node.parent
-    matching_node.parent = None
 
 
 def load_environment_tree_from_json(simulation_name, observer):

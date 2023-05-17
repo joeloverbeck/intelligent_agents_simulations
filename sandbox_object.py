@@ -11,7 +11,10 @@ class SandboxObject:
     """Represents an interactable object in a simulation"""
 
     def __init__(self, identifier, name, description):
-        self.identifier = identifier
+        if identifier is None:
+            raise InvalidParameterError("Attempted to initialize a SandboxObject with a None identifier.")
+
+        self._identifier = identifier
         self.name = name
         self.description = description
 
@@ -26,12 +29,15 @@ class SandboxObject:
             dict: the sandbox object's data as a dict
         """
         return {
-            "identifier": self.identifier,
+            "identifier": self._identifier,
             "name": self.name,
             "description": self.description,
             "type": "SandboxObject",
             "action_status": self._action_status,
         }
+
+    def get_identifier(self):
+        return self._identifier
 
     def set_action_status(self, action_status, silence=False):
         """Sets the action status of the sandbox object
@@ -86,7 +92,7 @@ class SandboxObject:
             observer.update(message)
 
     def __str__(self):
-        return f"Sandbox object: {self.name} ({self.identifier})"
+        return f"Sandbox object: {self.name} ({self._identifier}) | description: {self.description}"
 
     def __repr__(self) -> str:
-        return f"Sandbox object: {self.name} ({self.identifier})"
+        return f"Sandbox object: {self.name} ({self._identifier}) | description: {self.description}"

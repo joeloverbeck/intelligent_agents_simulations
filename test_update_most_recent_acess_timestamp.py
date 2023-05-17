@@ -1,7 +1,9 @@
 import datetime
 import unittest
 
+from anytree import Node
 from agent import Agent
+from location import Location
 from memories_querying import update_most_recent_access_timestamps
 
 
@@ -63,8 +65,10 @@ class TestUpdateMostRecentAccessTimestamp(unittest.TestCase):
         delta = datetime.timedelta(minutes=30)
 
         new_time = current_time + delta
+        
+        town = Node(Location("town", "town", "town"))
 
-        agent = Agent("test", 22, None, None)
+        agent = Agent("test", 22, town, town)
 
         memories_raw_data = update_most_recent_access_timestamps(
             agent,
