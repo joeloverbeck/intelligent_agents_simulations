@@ -7,9 +7,7 @@ from location import Location
 from sandbox_object import SandboxObject
 
 
-
 class TestWipePreviousActionAttributeValuesFromAgent(unittest.TestCase):
-    
     def test_can_wipe_used_object_action_status(self):
         town = Node(Location("town", "town", "a quaint town"))
         house = Node(Location("house", "house", "a two-story house"), parent=town)
@@ -39,6 +37,7 @@ class TestWipePreviousActionAttributeValuesFromAgent(unittest.TestCase):
         self.assertEqual(agent.get_destination_node(), None)
         self.assertEqual(agent.get_using_object(), None)
         self.assertEqual(bed.name.get_action_status(), "idle")
+
 
 if __name__ == "__main__":
     unittest.main()

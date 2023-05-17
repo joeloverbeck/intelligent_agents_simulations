@@ -1,18 +1,21 @@
 import json
-from environment import find_node_by_identifier
+from anytree import Node
+from environment import find_node_by_identifier, load_environment_tree_from_json
 from errors import AlgorithmError
 from file_utils import ensure_full_file_path_exists
 from agent import Agent
+from substitute_node import substitute_node
 from vector_storage import create_json_file
+from wrappers import validate_agent_type
 
 
-def load_agent_attributes_from_raw_data(key, agents_data, environment_tree, observer):
+def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, observer):
     """Loads into an instante of Agent the proper attribute values from the raw data
 
     Args:
         key (str): the name of the agent
         agents_data (dict): the raw data of agents loaded from json
-        environment_tree (Node): the root node of the environment tree
+        simulation_name (str): the name of the simulation with which this agent is involved
         observer (Object): the instance that wants to subscribe to an agent's updates
 
     Returns:
@@ -22,16 +25,19 @@ def load_agent_attributes_from_raw_data(key, agents_data, environment_tree, obse
     # in the json data.
     current_location_node = None
 
+    # load the individual environment tree from the corresponding file
+    agent_environment_tree = load_environment_tree_from_json(simulation_name, f"{key.lower()}_environment", observer)
+
     if agents_data[key]["current_location_node"] is not None:
         current_location_node = find_node_by_identifier(
-            environment_tree, agents_data[key]["current_location_node"]
+            agent_environment_tree, agents_data[key]["current_location_node"]
         )
 
     agent = Agent(
         key,
         int(agents_data[key]["age"]),
         current_location_node,
-        environment_tree,
+        agent_environment_tree,
     )
 
     agent.set_planned_action(agents_data[key]["planned_action"], silent=True)
@@ -41,7 +47,7 @@ def load_agent_attributes_from_raw_data(key, agents_data, environment_tree, obse
     # check the using object node
     if agents_data[key]["using_object"] is not None:
         using_object = find_node_by_identifier(
-            environment_tree, agents_data[key]["using_object"]
+            agent_environment_tree, agents_data[key]["using_object"]
         )
 
         agent.set_using_object(using_object, silent=True)
@@ -49,7 +55,7 @@ def load_agent_attributes_from_raw_data(key, agents_data, environment_tree, obse
     # check the destination node
     if agents_data[key]["destination_node"] is not None:
         destination_node = find_node_by_identifier(
-            environment_tree, agents_data[key]["destination_node"]
+            agent_environment_tree, agents_data[key]["destination_node"]
         )
 
         agent.set_destination_node(destination_node, silent=True)
@@ -59,7 +65,7 @@ def load_agent_attributes_from_raw_data(key, agents_data, environment_tree, obse
     return agent
 
 
-def load_agents(simulation_name, environment_tree, observer):
+def load_agents(simulation_name, observer):
     """Loads the agents of a simulation
 
     Args:
@@ -76,9 +82,7 @@ def load_agents(simulation_name, environment_tree, observer):
     agents = []
 
     for key in agents_data.keys():
-        agent = load_agent_attributes_from_raw_data(
-            key, agents_data, environment_tree, observer
-        )
+        agent = load_agent_attributes_from_raw_data(key, agents_data, simulation_name, observer)
 
         agents.append(agent)
 
@@ -105,6 +109,26 @@ def substitute_agent(agents, agent):
         raise AlgorithmError(error_message) from exception
 
     agents[index] = agent
+
+
+@validate_agent_type
+def update_agent_current_location_node_from_environment_tree(
+    agent: Agent, environment_tree: Node
+):
+    """Updates an agent's current location node from another environment tree
+
+    Args:
+        agent (Agent): the agent whose current location node will be updated
+        environment_tree (Node): the other environment tree from which a matching node will be retrieved
+    """
+    matching_node = find_node_by_identifier(
+        environment_tree,
+        agent.get_current_location_node().name.get_identifier(),
+    )
+
+    agent.set_environment_tree(
+        substitute_node(agent.get_environment_tree(), matching_node.name)
+    )
 
 
 def save_agents_to_json(simulation_name: str, agents: list):
@@ -135,7 +159,7 @@ def wipe_previous_action_attribute_values_from_agent(agent: Agent):
         agent.set_action_status(None)
     if agent.get_destination_node() is not None:
         agent.set_destination_node(None)
-    if agent.get_using_object() is not None:        
+    if agent.get_using_object() is not None:
         # the action status of the corresponding used object should be defaulted
         agent.get_using_object().name.set_action_status("idle")
 

@@ -11,7 +11,9 @@ class Location:
 
     def __init__(self, identifier, name, description):
         if identifier is None:
-            raise InvalidParameterError("Attempted to set a None identifier for a Location.")
+            raise InvalidParameterError(
+                "Attempted to set a None identifier for a Location."
+            )
 
         self._identifier = identifier
         self.name = name

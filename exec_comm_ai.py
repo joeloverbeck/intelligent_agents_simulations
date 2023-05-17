@@ -1,5 +1,8 @@
 import requests
-from defines import INSTRUCT_VICUNA_1_1_PROMPT_ANSWER_OPENING, INSTRUCT_VICUNA_1_1_PROMPT_HEADER
+from defines import (
+    INSTRUCT_VICUNA_1_1_PROMPT_ANSWER_OPENING,
+    INSTRUCT_VICUNA_1_1_PROMPT_HEADER,
+)
 from errors import UnableToConnectWithAiModelError
 from regular_expression_utils import remove_end_tag_from_ai_response
 
@@ -18,7 +21,6 @@ def try_to_get_a_test_response_from_oobabooga(prompt):
     """
     host = "localhost:5000"
     uri = f"http://{host}/api/v1/generate"
-
 
     request_for_oobabooga = {
         "prompt": prompt,
@@ -70,7 +72,9 @@ def main():
 
     prompt, response = try_to_get_a_test_response_from_oobabooga(prompt)
 
-    print(f"\nRESULTS:\nPrompt: {prompt}\nResponse: {remove_end_tag_from_ai_response(response)}")
+    print(
+        f"\nRESULTS:\nPrompt: {prompt}\nResponse: {remove_end_tag_from_ai_response(response)}"
+    )
 
 
 if __name__ == "__main__":

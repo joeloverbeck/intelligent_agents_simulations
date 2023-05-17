@@ -16,5 +16,6 @@ class TestCanExtractImportanceFromText(unittest.TestCase):
 
         self.assertEqual(importance, 5)
 
+
 if __name__ == "__main__":
     unittest.main()

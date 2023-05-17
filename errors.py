@@ -18,10 +18,6 @@ class MissingCharacterSummaryError(Exception):
     pass
 
 
-class FailedToDeleteFileError(Exception):
-    pass
-
-
 class DisparityBetweenDatabasesError(Exception):
     pass
 
@@ -47,10 +43,6 @@ class DirectoryDoesntExistError(Exception):
 
 
 class FileDoesntExistError(Exception):
-    pass
-
-
-class VariableNotInitializedError(Exception):
     pass
 
 

@@ -1,5 +1,5 @@
-
 from anytree import Node, iterators
+
 
 def calculate_number_of_nodes_in_tree(environment_tree: Node):
     """Calculates the number of nodes in a tree
@@ -10,6 +10,4 @@ def calculate_number_of_nodes_in_tree(environment_tree: Node):
     Returns:
         int: the number of nodes in the environment tree
     """
-    return len(
-        list(iterators.PreOrderIter(environment_tree))
-    )
+    return len(list(iterators.PreOrderIter(environment_tree)))

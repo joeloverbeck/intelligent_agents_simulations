@@ -65,7 +65,7 @@ class TestUpdateMostRecentAccessTimestamp(unittest.TestCase):
         delta = datetime.timedelta(minutes=30)
 
         new_time = current_time + delta
-        
+
         town = Node(Location("town", "town", "town"))
 
         agent = Agent("test", 22, town, town)

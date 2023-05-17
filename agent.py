@@ -12,16 +12,22 @@ class Agent:
 
     def __init__(self, name, age, current_location_node, environment_tree):
         if current_location_node is None:
-            raise InvalidParameterError("An agent should be initialized with a 'current_location_node'.")
+            raise InvalidParameterError(
+                "An agent should be initialized with a 'current_location_node'."
+            )
         if environment_tree is None:
-            raise InvalidParameterError("An agent should be loaded with an 'environment_tree'.")
+            raise InvalidParameterError(
+                "An agent should be loaded with an 'environment_tree'."
+            )
 
         self.name = name
         self.age = age
 
         self._environment_tree = environment_tree
 
-        self._number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(self._environment_tree)
+        self._number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(
+            self._environment_tree
+        )
 
         self._current_location_node = current_location_node
 
@@ -42,7 +48,9 @@ class Agent:
         """
         # Careful: we need to ensure that we won't set an environment tree that violates
         # the integrity of what we expected.
-        if self._number_of_nodes_in_tree != calculate_number_of_nodes_in_tree(environment_tree):
+        if self._number_of_nodes_in_tree != calculate_number_of_nodes_in_tree(
+            environment_tree
+        ):
             error_message = f"The function {self.set_environment_tree.__name__} received an 'environment_tree' that would violate the integrity of the tree."
             error_message += f" Expected {self._number_of_nodes_in_tree} nodes, and got {calculate_number_of_nodes_in_tree(environment_tree)}."
             raise AlgorithmError()

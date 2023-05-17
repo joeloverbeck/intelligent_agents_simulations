@@ -19,33 +19,11 @@ from defines import (
 from errors import (
     DatabaseDoesntExistError,
     DisparityBetweenDatabasesError,
-    FailedToDeleteFileError,
     UnableToSaveVectorDatabaseError,
 )
 from math_utils import calculate_recency, normalize_value
 from regular_expression_utils import extract_rating_from_text
 from wrappers import validate_agent_type
-
-
-def delete_memories_database(agent):
-    database_filename = get_database_filename(agent)
-    json_filename = get_json_filename(agent)
-
-    if os.path.isfile(json_filename):
-        try:
-            os.remove(json_filename)
-        except Exception as exception:
-            raise FailedToDeleteFileError(
-                f"Was unable to delete file {json_filename}. Error: {exception}"
-            ) from exception
-
-    if os.path.isfile(database_filename):
-        try:
-            os.remove(database_filename)
-        except Exception as exception:
-            raise FailedToDeleteFileError(
-                f"Was unable to delete file {database_filename}. Error: {exception}"
-            ) from exception
 
 
 def process_raw_data(raw_text):

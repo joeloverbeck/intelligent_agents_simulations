@@ -40,4 +40,7 @@ def save_current_timestamp(simulation_name: str, current_timestamp: datetime):
 
     simulation_variables_raw_data["current_timestamp"] = current_timestamp.isoformat()
 
-    create_json_file(f"simulations/{simulation_name.lower()}/variables.json", simulation_variables_raw_data)
+    create_json_file(
+        f"simulations/{simulation_name.lower()}/variables.json",
+        simulation_variables_raw_data,
+    )

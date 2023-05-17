@@ -33,5 +33,5 @@ def extract_rating_from_text(text, prompt_that_originated_text, silent=False):
 
 
 def remove_end_tag_from_ai_response(text):
-    pattern = '</s>$'
-    return re.sub(pattern, '', text)
+    pattern = "</s>$"
+    return re.sub(pattern, "", text)

@@ -9,8 +9,8 @@ from file_utils import ensure_full_file_path_exists
 from location import Location
 
 from sandbox_object import SandboxObject
+from string_utils import replace_spaces_with_underscores
 from vector_storage import create_json_file
-
 
 
 def find_node_by_identifier(root_node, identifier):
@@ -24,7 +24,9 @@ def find_node_by_identifier(root_node, identifier):
         Node: the node that contains either a Location or SandboxObject that has the passed identifier
     """
     try:
-        matching_node = find(root_node, lambda node: node.name.get_identifier() == identifier)
+        matching_node = find(
+            root_node, lambda node: node.name.get_identifier() == identifier
+        )
     except AttributeError as exception:
         error_message = (
             f"In the function {find_node_by_identifier.__name__}, the code was unable "
@@ -75,22 +77,26 @@ def build_environment_tree(node_data, observer, parent=None):
     return node
 
 
-
-def load_environment_tree_from_json(simulation_name, observer):
+def load_environment_tree_from_json(simulation_name, file_name, observer):
     """Loads the environment tree of a simulation from its json file.
 
     Args:
         simulation_name (str): the name of the simulation (no extension, no directories)
+        file_name (str): the name of the file in the simulation's directory (without the extension)
+        observer (Object): an instance that implements the observer pattern
 
     Raises:
         DirectoryDoesntExistError: if the directory 'simulations' doesn't exist
         DirectoryDoesntExistError: if the directory 'simulations/{name}' doesn't exist
-        FileDoesntExistError: if the file 'simulations/{name}/environment.json' doesn't exist
+        FileDoesntExistError: if the file 'simulations/{name}/{file_name}.json' doesn't exist
 
     Returns:
         Node: the root of the environment tree
     """
-    full_path = ensure_full_file_path_exists(simulation_name, "environment")
+    # Ensure that the file name has the expected format
+    file_name = replace_spaces_with_underscores(file_name)
+
+    full_path = ensure_full_file_path_exists(simulation_name, file_name)
 
     with open(full_path, "r", encoding="utf8") as file:
         data = json.load(file)

@@ -1,10 +1,6 @@
 """This module provides methods for determining action statuses of both agents and sandbox objects
 """
 from anytree import Node
-from actions import (
-    request_for_what_length_of_time_the_action_should_take_place,
-    request_what_action_to_take_now,
-)
 from agent import Agent
 from api_requests import request_response_from_ai_model
 from errors import AlgorithmError, InvalidParameterError
@@ -163,7 +159,9 @@ def determine_if_agent_will_use_sandbox_object(agent: Agent):
 
         # At this point, the agent does not have a destination, and is already able to start using the sandbox object
         determine_action_statuses_for_using_object(
-            agent, request_used_object_action_status, request_used_object_action_status
+            agent,
+            request_agent_action_status_for_using_object,
+            request_used_object_action_status,
         )
 
         # sanity check
@@ -248,7 +246,9 @@ def produce_action_statuses_for_agent_and_sandbox_object(
         agent, agent.get_environment_tree()
     )
 
-    produce_action_statuses_for_agent_based_on_destination_node_function(agent, destination_node)
+    produce_action_statuses_for_agent_based_on_destination_node_function(
+        agent, destination_node
+    )
 
     # Sanity checks:
     if agent.get_action_status() is None:

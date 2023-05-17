@@ -13,3 +13,10 @@ def end_string_with_period(text):
             text += "."  # if no special character at the end, add period
 
     return text
+
+
+def replace_spaces_with_underscores(text):
+    lower_text = text.lower()
+    result = lower_text.replace(" ", "_")
+
+    return result

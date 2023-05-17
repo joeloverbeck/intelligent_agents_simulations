@@ -20,14 +20,13 @@ def fake_produce_action_statuses_for_agent_and_sandbox_object_function(
     _determine_sandbox_object_destination_from_root_function,
     _produce_action_statuses_for_agent_based_on_destination_node_function,
     _request_what_action_to_take_now_function,
-    _request_for_what_length_of_time_the_action_should_take_place_function
+    _request_for_what_length_of_time_the_action_should_take_place_function,
 ):
     pass
 
 
 class TestSimulation(unittest.TestCase):
     def test_can_create_simulation(self):
-
         simulation = Simulation("test_1")
 
         simulation.set_request_character_summary_function(
@@ -46,7 +45,7 @@ class TestSimulation(unittest.TestCase):
 
         simulation = Simulation("test_1")
 
-        def fake_load_environment_function(_simulation_name, _self):
+        def fake_load_environment_function(_simulation_name, _file_name, _self):
             return town
 
         simulation.set_load_environment_function(fake_load_environment_function)
@@ -63,13 +62,12 @@ class TestSimulation(unittest.TestCase):
 
         self.assertEqual(town.name, environment_tree.name)
 
-
     def test_can_retrieve_agents_from_simulation(self):
         town = Node(Location("town", "town", "a quaint town"))
 
         simulation = Simulation("test_1")
 
-        def fake_load_environment_function(_simulation_name, _self):
+        def fake_load_environment_function(_simulation_name, _file_name, _self):
             return town
 
         simulation.set_load_environment_function(fake_load_environment_function)
@@ -92,7 +90,7 @@ class TestSimulation(unittest.TestCase):
 
         simulation = Simulation("test_1")
 
-        def fake_load_environment_function(_simulation_name, _self):
+        def fake_load_environment_function(_simulation_name, _file_name, _self):
             return town
 
         simulation.set_load_environment_function(fake_load_environment_function)
@@ -118,7 +116,7 @@ class TestSimulation(unittest.TestCase):
 
         simulation = Simulation("test_1")
 
-        def fake_load_environment_function(_simulation_name, _self):
+        def fake_load_environment_function(_simulation_name, _file_name, _self):
             return town
 
         simulation.set_load_environment_function(fake_load_environment_function)

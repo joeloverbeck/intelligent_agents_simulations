@@ -5,7 +5,7 @@ from environment import load_environment_tree_from_json
 
 class TestLoadEnvironment(unittest.TestCase):
     def test_can_load_test_1_environment(self):
-        environment_tree = load_environment_tree_from_json("test_1", None)
+        environment_tree = load_environment_tree_from_json("test_1", "environment", None)
 
         self.assertEqual(environment_tree.name.name, "town")
         self.assertEqual(len(environment_tree.children), 1)

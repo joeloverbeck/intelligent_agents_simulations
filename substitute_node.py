@@ -55,7 +55,9 @@ def sanity_checks_for_substitute_node(environment_tree: Node, new_object):
         )
 
 
-def insert_new_node_in_environment_tree(matching_node: Node, new_object, environment_tree):
+def insert_new_node_in_environment_tree(
+    matching_node: Node, new_object, environment_tree
+):
     """Inserts the new node in the environment tree, taking children and parent as necessary
 
     Args:
@@ -72,6 +74,12 @@ def insert_new_node_in_environment_tree(matching_node: Node, new_object, environ
 
     if matching_node.parent is not None:
         new_node.parent = matching_node.parent
+
+        # ensure that the parent now considers the new_node as its child
+        if new_node not in new_node.parent.children:
+            raise AlgorithmError(
+                f"The function {insert_new_node_in_environment_tree.__name__} failed to make the new parent of 'new_node' consider the new node its child."
+            )
     else:  # handle case where matching_node is the root
         environment_tree = new_node
 
@@ -98,16 +106,22 @@ def substitute_node(environment_tree: Node, new_object):
     """
     sanity_checks_for_substitute_node(environment_tree, new_object)
 
-    initial_number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(environment_tree)
+    initial_number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(
+        environment_tree
+    )
 
-    matching_node = find_node_by_identifier(environment_tree, new_object.get_identifier())
+    matching_node = find_node_by_identifier(
+        environment_tree, new_object.get_identifier()
+    )
 
     if matching_node is None:
         raise AlgorithmError(
             f"Was unable to find a matching node in {substitute_node.__name__}. This should be impossible."
         )
 
-    environment_tree = insert_new_node_in_environment_tree(matching_node, new_object, environment_tree)
+    environment_tree = insert_new_node_in_environment_tree(
+        matching_node, new_object, environment_tree
+    )
 
     final_number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(environment_tree)
 

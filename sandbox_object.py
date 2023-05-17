@@ -12,7 +12,9 @@ class SandboxObject:
 
     def __init__(self, identifier, name, description):
         if identifier is None:
-            raise InvalidParameterError("Attempted to initialize a SandboxObject with a None identifier.")
+            raise InvalidParameterError(
+                "Attempted to initialize a SandboxObject with a None identifier."
+            )
 
         self._identifier = identifier
         self.name = name

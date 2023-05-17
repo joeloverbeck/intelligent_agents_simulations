@@ -8,10 +8,14 @@ from action_statuses import (
     determine_if_agent_will_use_sandbox_object,
     produce_action_statuses_for_agent_and_sandbox_object,
 )
-from agent_utils import load_agents, save_agents_to_json, substitute_agent
+from agent_utils import (
+    load_agents,
+    save_agents_to_json,
+    substitute_agent,
+    update_agent_current_location_node_from_environment_tree,
+)
 from character_summaries import request_character_summary
 from environment import (
-    find_node_by_identifier,
     load_environment_tree_from_json,
     save_environment_tree_to_json,
 )
@@ -25,8 +29,6 @@ from substitute_node import substitute_node
 from update_type import UpdateType
 
 
-
-
 class Simulation:
     """This class handles running a simulation."""
 
@@ -37,7 +39,9 @@ class Simulation:
         simulation_path = f"simulations/{self.name.lower()}"
 
         if not os.path.exists(simulation_path):
-            raise DirectoryDoesntExistError(f"The directory '{simulation_path}' does not exist.")
+            raise DirectoryDoesntExistError(
+                f"The directory '{simulation_path}' does not exist."
+            )
 
         self._environment_tree = None
 
@@ -50,7 +54,9 @@ class Simulation:
 
         self._load_environment_function = load_environment_tree_from_json
         self._request_character_summary_function = request_character_summary
-        self._produce_action_statuses_for_agent_and_sandbox_object_function = produce_action_statuses_for_agent_and_sandbox_object
+        self._produce_action_statuses_for_agent_and_sandbox_object_function = (
+            produce_action_statuses_for_agent_and_sandbox_object
+        )
 
     def set_load_environment_function(self, load_environment_function):
         """Sets the function that will load the environment tree
@@ -86,11 +92,13 @@ class Simulation:
         """Initializes the simulation"""
         self._load_simulation_variables()
 
-        self._environment_tree = self._load_environment_function(self.name, self)
+        self._environment_tree = self._load_environment_function(self.name, "environment", self)
 
-        self._number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(self._environment_tree)
+        self._number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(
+            self._environment_tree
+        )
 
-        self._agents = load_agents(self.name, self._environment_tree, self)
+        self._agents = load_agents(self.name, self)
 
         # We need to ensure that the memories of each agent exist. If they don't,
         # we need to try to generate them from the 'seed_memories.txt'
@@ -112,9 +120,10 @@ class Simulation:
         return self._environment_tree
 
     def set_environment_tree(self, environment_tree: Node):
-        """Sets the environment tree of the simulation
-        """
-        if self._number_of_nodes_in_tree != calculate_number_of_nodes_in_tree(environment_tree):
+        """Sets the environment tree of the simulation"""
+        if self._number_of_nodes_in_tree != calculate_number_of_nodes_in_tree(
+            environment_tree
+        ):
             error_message = f"The function {self.set_environment_tree.__name__} received an environment tree that violated the integrity. "
             error_message += f"Expected {self._number_of_nodes_in_tree} nodes, got {calculate_number_of_nodes_in_tree(environment_tree)}."
             raise AlgorithmError(error_message)
@@ -136,16 +145,6 @@ class Simulation:
         self._minutes_advanced_each_step = simulation_variables[
             "minutes_advanced_each_step"
         ]
-
-    def _update_agent_destination_node_if_necessary(self, agent):
-        if agent.get_destination_node() is not None:
-            if agent.get_destination_node().parent is None and agent.get_destination_node().name != agent.get_current_location_node().name:
-                # I don't know why sometimes some destination nodes don't have parents, but if that's the case,
-                # we need to substitute it for the matching node from main.
-                agent.set_destination_node(find_node_by_identifier(
-                    self.get_environment_tree(),
-                    agent.get_destination_node().name.get_identifier(),
-                ))
 
     def update(self, update_message: dict):
         """Receives an update from an observed instance
@@ -174,28 +173,25 @@ class Simulation:
         save_current_timestamp(self.name, self.current_timestamp)
 
         for agent in self._agents:
-            self._update_agent_destination_node_if_necessary(agent)
-
             # if the agent was moving, we gotta move the agent to the next node.
             perform_agent_movement(agent)
 
             # substitute the current_location_node of the agent by a fresh one from the environment tree,
             # which presumably is updated
-            matching_node = find_node_by_identifier(
-                self.get_environment_tree(),
-                agent.get_current_location_node().name.get_identifier(),
+            update_agent_current_location_node_from_environment_tree(
+                agent, self.get_environment_tree()
             )
 
-            agent.set_environment_tree(substitute_node(agent.get_environment_tree(), matching_node.name))
-
             # As long as the agent isn't already using an object, it must be checked if he or she should
-            if agent.get_using_object() is None and agent.get_planned_action() is not None:
+            if (
+                agent.get_using_object() is None
+                and agent.get_planned_action() is not None
+            ):
                 determine_if_agent_will_use_sandbox_object(agent)
             else:
                 agent.notify(
                     {"type": UpdateType.AGENT_CONTINUES_USING_OBJECT, "agent": agent}
                 )
-
 
 
 def handle_case_sandbox_object_changed_action_status(simulation, update_message):

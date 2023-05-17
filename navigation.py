@@ -22,7 +22,6 @@ from wrappers import (
 )
 
 
-
 @validate_agent_type
 @validate_agent_planned_action
 @validate_agent_has_character_summary
@@ -184,13 +183,15 @@ def perform_agent_movement(agent: Agent):
         # Agent is already at destination. No movement is needed.
         agent.set_destination_node(None)
         return
-    
+
     move_agent_immediately_to_containing_location_if_necessary(agent)
 
     next_node_closer_to_destination = get_node_one_step_closer_to_destination(agent)
 
     # Note, the current location node should never be none.
-    crash_if_next_node_closer_to_destination_is_none(next_node_closer_to_destination, agent)
+    crash_if_next_node_closer_to_destination_is_none(
+        next_node_closer_to_destination, agent
+    )
 
     agent.set_current_location_node(next_node_closer_to_destination)
 

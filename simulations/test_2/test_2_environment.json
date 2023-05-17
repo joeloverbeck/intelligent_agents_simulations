@@ -1,0 +1,31 @@
+{
+    "identifier": "town",
+    "name": "town",
+    "description": "a quaint town",
+    "type": "Location",
+    "children": [
+        {
+            "identifier": "park",
+            "name": "park",
+            "description": "a public park",
+            "type": "Location",
+            "children": [
+                {
+                    "identifier": "bench",
+                    "name": "bench",
+                    "description": "a bench on which to sit",
+                    "action_status": "idle",
+                    "type": "SandboxObject",
+                    "children": []
+                }
+            ]
+        },
+        {
+            "identifier": "house",
+            "name": "house",
+            "description": "a two-story house",
+            "type": "Location",
+            "children": []
+        }
+    ]
+}
