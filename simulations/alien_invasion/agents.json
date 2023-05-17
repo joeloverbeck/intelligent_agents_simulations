@@ -1,1 +1,18 @@
-{"Joel": {"age": 38, "planned_action": null, "action_status": "The fridge's status remains unchanged.", "current_location_node": "fridge", "destination_node": null, "using_object": "fridge"}, "Betty": {"age": 24, "planned_action": null, "action_status": "The status of the tools in the barn remains unchanged as there is no information given to suggest that Betty will be using or affecting them during her conversation with Joel.", "current_location_node": "tools", "destination_node": null, "using_object": "tools"}}
+{
+    "Joel": {
+        "age": 38,
+        "planned_action": null,
+        "action_status": "The fridge's status remains unchanged.",
+        "current_location_node": "fridge",
+        "destination_node": null,
+        "using_object": "fridge"
+    },
+    "Betty": {
+        "age": 24,
+        "planned_action": null,
+        "action_status": "The status of the tools in the barn remains unchanged as there is no information given to suggest that Betty will be using or affecting them during her conversation with Joel.",
+        "current_location_node": "tools",
+        "destination_node": null,
+        "using_object": "tools"
+    }
+}
