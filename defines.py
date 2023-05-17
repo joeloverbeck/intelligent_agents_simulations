@@ -29,7 +29,7 @@ INSTRUCT_GPT_PROMPT_HEADER = "Question. "
 INSTRUCT_GPT_PROMPT_ANSWER_OPENING = " Answer:"
 
 DEBUGGING = False
-USE_GPT = False
+USE_GPT = True
 
 
 def get_seed_memories_filename(agent):
