@@ -29,4 +29,9 @@ You can run the unit tests with the following command:
 python -m unittest discover
 ```
 
-Note that the tests require at least access to the local LLM running on oobabooga's server.
+The tests don't run any AI model.
+
+## Posts about this project
+
+[Intelligent agents for simulations (using LLMs) #1](https://jonurenawriter.com/2023/05/17/intelligent-agents-for-simulations-using-llms-1/)
+[Intelligent agents for simulations (using LLMs) #2](https://jonurenawriter.com/2023/05/18/intelligent-agents-for-simulations-using-llms-2/)
