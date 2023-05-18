@@ -12,10 +12,10 @@ from agent_utils import (
     load_agents,
     save_agents_to_json,
     substitute_agent,
+    update_agent_current_location_node,
 )
 from character_summaries import request_character_summary
 from environment import (
-    find_node_by_identifier,
     load_environment_tree_from_json,
     save_environment_tree_to_json,
 )
@@ -24,6 +24,8 @@ from errors import AlgorithmError, DirectoryDoesntExistError, InvalidParameterEr
 from initialization import set_initial_state_of_agent
 from logging_messages import log_simulation_message
 from navigation import perform_agent_movement
+from observation_system import ObservationSystem, RegisteredUpdateDataKey
+from registered_update_type import RegisteredUpdateType
 from sandbox_object import SandboxObject
 from simulation_variables import load_simulation_variables, save_current_timestamp
 from update_location_in_environment_tree import update_node_in_environment_tree
@@ -49,6 +51,8 @@ class Simulation:
         self._number_of_nodes_in_tree = None
 
         self._agents = []
+
+        self._observation_system = None
 
         self.current_timestamp = None
         self._minutes_advanced_each_step = None
@@ -100,6 +104,8 @@ class Simulation:
         self._number_of_nodes_in_tree = calculate_number_of_nodes_in_tree(
             self._environment_tree
         )
+
+        self._observation_system = ObservationSystem(self.current_timestamp)
 
         self._agents = load_agents(self.name, self)
 
@@ -165,12 +171,28 @@ class Simulation:
 
         process_updates(self, update_message)
 
+    def register_update(
+        self, registered_update_type: RegisteredUpdateType, update_data: dict
+    ):
+        """Registers an update with the observation system
+
+        Args:
+            registered_update_type (RegisteredUpdateType): the type of update that will get registered
+            update_data (dict): the data associated with the update
+        """
+        self._observation_system.register_update(registered_update_type, update_data)
+
     def step(self):
         """Executes one step of the simulation, advancing in the process the current timestamp
         by the specified value loaded from the variables.
         """
+        # Refresh the dict of updates
         self.current_timestamp = self.current_timestamp + datetime.timedelta(
             minutes=self._minutes_advanced_each_step
+        )
+
+        self._observation_system.check_timestamp(
+            self.current_timestamp, self._minutes_advanced_each_step
         )
 
         save_current_timestamp(self.name, self.current_timestamp)
@@ -179,10 +201,13 @@ class Simulation:
             # If the agent was moving, we gotta move the agent to the next node.
             perform_agent_movement(agent)
 
-            # After the movement, the agent should have its current location updated
-            # with the matching node values of the simulation's environment tree
-            matching_node = find_node_by_identifier(self.get_environment_tree(), agent.get_current_location_node().name.get_identifier())
-            update_node_in_environment_tree(matching_node, agent.get_environment_tree())
+            # After the movement, the agent should have its current location (that may be a Sandbox Object)
+            # updated with the matching node values of the simulation's environment tree
+            update_agent_current_location_node(agent, self.get_environment_tree())
+
+            self._observation_system.determine_if_observation_triggers(
+                agent, self.get_agents(), self.get_environment_tree()
+            )
 
             # As long as the agent isn't already using an object, it must be checked if he or she should use one.
             if (
@@ -196,8 +221,19 @@ class Simulation:
                 )
 
 
-def handle_case_sandbox_object_changed_action_status(simulation, update_message):
-    if not isinstance(update_message['sandbox_object'], SandboxObject):
+def handle_case_sandbox_object_changed_action_status(
+    simulation: Simulation, update_message: dict
+):
+    """Handles the case that a sandbox object changed action status
+
+    Args:
+        simulation (Simulation): the simulation involved
+        update_message (dict): the data of the update message
+
+    Raises:
+        AlgorithmError: if the object received in the update wasn't a SandboxObject
+    """
+    if not isinstance(update_message["sandbox_object"], SandboxObject):
         error_message = f"The function {handle_case_sandbox_object_changed_action_status} received a supposed sandbox object that wasn't one: "
         error_message += f"{update_message['sandbox_object']}"
         raise AlgorithmError(error_message)
@@ -206,21 +242,63 @@ def handle_case_sandbox_object_changed_action_status(simulation, update_message)
     message += f"changed action status to: {update_message['sandbox_object'].get_action_status()}"
     log_simulation_message(simulation.name, message)
 
+    # Set the update in the dict
+    simulation.register_update(
+        RegisteredUpdateType.SANDBOX_OBJECT_UPDATED,
+        {
+            RegisteredUpdateDataKey.IDENTIFIER: update_message[
+                "sandbox_object"
+            ].get_identifier(),
+            RegisteredUpdateDataKey.UPDATE_AGENT_NAME: update_message[
+                "triggering_agent_name"
+            ],
+        },
+    )
+
     # Update the data of the corresponding sandbox object in the main environment tree
-    update_node_in_environment_tree(Node(update_message['sandbox_object']), simulation.get_environment_tree())
-    save_environment_tree_to_json(simulation.name, "environment", simulation.get_environment_tree())
+    update_node_in_environment_tree(
+        Node(update_message["sandbox_object"]),
+        simulation.get_environment_tree(),
+        update_message["triggering_agent_name"],
+    )
+
+    save_environment_tree_to_json(
+        simulation.name, "environment", simulation.get_environment_tree()
+    )
 
 
-def handle_case_agent_changed_current_location_node(simulation, update_message):
+def handle_case_agent_changed_current_location_node(
+    simulation: Simulation, update_message: dict
+):
+    """Handles the case that an agent changed his or her current location node
+
+    Args:
+        simulation (Simulation): the simulation involved
+        update_message (dict): the data of the update message
+    """
     message = f"{simulation.current_timestamp.isoformat()} {update_message['agent'].name} changed "
     message += f"the current location node to: {update_message['agent'].get_current_location_node()}"
     log_simulation_message(simulation.name, message)
+
+    # Set the update in the dict
+    simulation.register_update(
+        RegisteredUpdateType.AGENT_MOVED_TO_LOCATION,
+        {RegisteredUpdateDataKey.UPDATE_AGENT_NAME: update_message["agent"].name},
+    )
 
     substitute_agent(simulation.get_agents(), update_message["agent"])
     save_agents_to_json(simulation.name, simulation.get_agents())
 
 
-def handle_case_agent_changed_action_status(simulation, update_message):
+def handle_case_agent_changed_action_status(
+    simulation: Simulation, update_message: dict
+):
+    """Handles the case that an agent changed action status
+
+    Args:
+        simulation (Simulation): the simulation involved
+        update_message (dict): the data of the update message
+    """
     message = f"{simulation.current_timestamp.isoformat()} {update_message['agent'].name} changed the action status to: {update_message['agent'].get_action_status()}"
     log_simulation_message(simulation.name, message)
 
@@ -228,15 +306,36 @@ def handle_case_agent_changed_action_status(simulation, update_message):
     save_agents_to_json(simulation.name, simulation.get_agents())
 
 
-def handle_case_agent_changed_character_summary(simulation, update_message):
+def handle_case_agent_changed_character_summary(
+    simulation: Simulation, update_message: dict
+):
+    """Handles the case that an agent changed the character summary
+
+    Args:
+        simulation (Simulation): the simulation involved
+        update_message (dict): the data of the update message
+    """
     message = f"{simulation.current_timestamp.isoformat()} {update_message['agent'].name} changed the character "
     message += f"summary to: {update_message['agent'].get_character_summary()}"
     log_simulation_message(simulation.name, message)
 
 
-def handle_case_agent_changed_using_object(simulation, update_message):
+def handle_case_agent_changed_using_object(
+    simulation: Simulation, update_message: dict
+):
+    """Handles the case that an agent changed using object
+
+    Args:
+        simulation (Simulation): the simulation involved
+        update_message (dict): the data of the update message
+    """
     message = f"{simulation.current_timestamp.isoformat()} {update_message['agent'].name} changed using object to: {update_message['agent'].get_using_object()}"
     log_simulation_message(simulation.name, message)
+
+    simulation.register_update(
+        RegisteredUpdateType.AGENT_USING_OBJECT,
+        {RegisteredUpdateDataKey.UPDATE_AGENT_NAME: update_message["agent"].name},
+    )
 
     substitute_agent(simulation.get_agents(), update_message["agent"])
     save_agents_to_json(simulation.name, simulation.get_agents())

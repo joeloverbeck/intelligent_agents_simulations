@@ -1,9 +1,13 @@
 import json
+from anytree import Node
 from api_requests import request_response_from_human
 from environment import find_node_by_identifier, load_environment_tree_from_json
 from errors import AlgorithmError
 from file_utils import ensure_full_file_path_exists
 from agent import Agent
+from location import Location
+from sandbox_object import SandboxObject
+from update_location_in_environment_tree import update_node_in_environment_tree
 from vector_storage import create_json_file
 
 
@@ -72,7 +76,7 @@ def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, obser
 
     # check the character summary
     if agents_data[key]["character_summary"] is not None:
-        agent.set_character_summary(agents_data[key]["character_summary"])
+        agent.set_character_summary(agents_data[key]["character_summary"], silent=True)
 
     agent.subscribe(observer)
 
@@ -103,6 +107,98 @@ def load_agents(simulation_name, observer):
         agents.append(agent)
 
     return agents
+
+
+def is_agent_in_same_location_as_another_agent(
+    agent: Agent, second_agent_name: str, agents: list[Agent]
+):
+    """Checks if an agent is in the same containing location as a different agent
+
+    Args:
+        agent (Agent): the first agent whose containing location will be compared
+        second_agent_name (str): the second agent whose containing location will be compared
+        agents (list[Agent]): all the agents involved in the related simulation
+
+    Raises:
+        AlgorithmError: if the second agent's name wasn't found in the passed list of agents
+
+    Returns:
+        bool, Agent: returns whether or not the agents are in the same containing location, and if their are,
+        the second element of the tuple also contains the data of the second agent in the comparison
+    """
+    # First, check if the update agent exists in the list of agents
+    if second_agent_name not in [a.name for a in agents]:
+        error_message = f"The function {is_agent_in_same_location_as_another_agent.__name__} was unable to find the agent in the list of agents."
+        error_message += (
+            f"Agent name: {agent.name} | Agent in the update {second_agent_name}."
+        )
+        raise AlgorithmError(error_message)
+
+    for update_agent in agents:
+        if update_agent.name == second_agent_name:
+            # Find the containing location of both agents involved
+            agent_containing_location_identifier = (
+                determine_agent_containing_location_identifier(agent)
+            )
+
+            update_agent_containing_location_identifier = (
+                determine_agent_containing_location_identifier(update_agent)
+            )
+
+            if (
+                agent_containing_location_identifier
+                == update_agent_containing_location_identifier
+            ):
+                return True, update_agent
+
+            return False, update_agent
+
+    return False, None
+
+
+def determine_agent_containing_location_identifier(agent: Agent):
+    """Determines the identifier of the Location that contains the agent
+
+    Args:
+        agent (Agent): the agent whose containing location will be determined
+
+    Raises:
+        AlgorithmError: if the agent is in a location that is neither a SandboxObject nor a Location
+
+    Returns:
+        str: the identifier of the containing location
+    """
+    if isinstance(agent.get_current_location_node().name, Location):
+        return agent.get_current_location_node().name.get_identifier()
+
+    if isinstance(agent.get_current_location_node().name, SandboxObject):
+        if agent.get_current_location_node().parent is None:
+            error_message = f"The function {determine_agent_containing_location_identifier.__name__} detected that the SandboxObject "
+            error_message += f"{agent.get_current_location_node()} didn't have a parent. Are you sure you have set up the environment correctly?"
+            raise AlgorithmError(error_message)
+
+        return agent.get_current_location_node().parent.name.get_identifier()
+
+    error_message = f"In the function {determine_agent_containing_location_identifier.__name__}, the agent {agent.name} was currently in a location that was neither "
+    error_message += f"a location nor a sandbox object. Current location node: {agent.get_current_location_node()}"
+    raise AlgorithmError(error_message)
+
+
+def update_agent_current_location_node(agent: Agent, environment_tree: Node):
+    """Updates an agent's current location node with that of the main environment tree
+
+    Args:
+        agent (Agent): the agent whose current location node will be updated
+        environment_tree (Node): the environment tree from which the matching node will be picked
+    """
+    matching_node = find_node_by_identifier(
+        environment_tree,
+        agent.get_current_location_node().name.get_identifier(),
+    )
+
+    update_node_in_environment_tree(
+        matching_node, agent.get_environment_tree(), agent.name
+    )
 
 
 def substitute_agent(agents, agent):
@@ -157,6 +253,6 @@ def wipe_previous_action_attribute_values_from_agent(agent: Agent):
         agent.set_destination_node(None)
     if agent.get_using_object() is not None:
         # the action status of the corresponding used object should be defaulted
-        agent.get_using_object().name.set_action_status("idle")
+        agent.get_using_object().name.set_action_status("idle", agent.name)
 
         agent.set_using_object(None)

@@ -16,12 +16,12 @@ class TestUpdateCurrentLocationInEnvironmentTree(unittest.TestCase):
 
         bed = Node(SandboxObject("bed", "bed", "a piece of furniture that people use to sleep"), parent=bedroom)
 
-        bed.name.set_action_status("action status")
+        bed.name.set_action_status("action status", None)
 
         new_bedroom = Node(Location("bedroom", "bedroom_2", "a room where people sleep"))
         Node(SandboxObject("bed", "bed_2", "a piece of furniture that people use to sleep"), parent=new_bedroom)
 
-        update_node_in_environment_tree(new_bedroom, house)
+        update_node_in_environment_tree(new_bedroom, house, None)
 
         self.assertEqual(bedroom.name.name, "bedroom_2")
         self.assertEqual(bed.name.name, "bed_2")
@@ -37,12 +37,12 @@ class TestUpdateCurrentLocationInEnvironmentTree(unittest.TestCase):
 
         bed = Node(SandboxObject("bed", "bed", "a piece of furniture that people use to sleep"), parent=bedroom)
 
-        bed.name.set_action_status("action status")
+        bed.name.set_action_status("action status", None)
 
         new_bedroom = Node(Location("bedroom", "bedroom_2", "a room where people sleep"))
         new_bed = Node(SandboxObject("bed", "bed_2", "a piece of furniture that people use to sleep"), parent=new_bedroom)
 
-        update_node_in_environment_tree(new_bed, house)
+        update_node_in_environment_tree(new_bed, house, None)
 
         self.assertEqual(bedroom.name.name, "bedroom")
         self.assertEqual(bed.name.name, "bed_2")

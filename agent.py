@@ -140,7 +140,7 @@ class Agent:
         """
         return self._action_status
 
-    def set_character_summary(self, character_summary):
+    def set_character_summary(self, character_summary, silent=False):
         """Sets the character summary of the agent.
 
         Args:
@@ -148,8 +148,9 @@ class Agent:
         """
         self._character_summary = character_summary
 
-        # Needs to notify of this update
-        self.notify({"type": UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY, "agent": self})
+        if not silent:
+            # Needs to notify of this update
+            self.notify({"type": UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY, "agent": self})
 
     def set_using_object(self, sandbox_object_node, silent=False):
         """Sets the object node that the agent will be marked as using.

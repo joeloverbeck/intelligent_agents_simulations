@@ -187,6 +187,4 @@ def request_response_from_human(prompt: str):
     Returns:
         str: the player's input
     """
-    # init(autoreset=True)
-    # print(Fore.GREEN +  + Fore.RED + "Answer: ", end="")
     return input(f"\n--> INPUT FROM HUMAN NEEDED <--\n\n{prompt}\nAnswer: ")

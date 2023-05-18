@@ -28,7 +28,7 @@ class TestWipePreviousActionAttributeValuesFromAgent(unittest.TestCase):
         agent.set_destination_node(bed, silent=True)
         agent.set_using_object(bed, silent=True)
 
-        bed.name.set_action_status("being used")
+        bed.name.set_action_status("being used", agent.name)
 
         wipe_previous_action_attribute_values_from_agent(agent)
 

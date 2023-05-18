@@ -58,7 +58,7 @@ def request_for_what_length_of_time_the_action_should_take_place(
 
     for most_recent_memory in most_recent_memories:
         prompt += f"- {most_recent_memory['description']}\n"
-    prompt += f"Now it is {format_date(current_timestamp)}. {agent.name} is planning to take the following action: {end_string_with_period(action)}.\n"
+    prompt += f"Now it is {format_date(current_timestamp)}. {agent.name} is planning to take the following action: {end_string_with_period(action)}\n"
     prompt += "For how many minutes should this action take place?"
 
     return agent.get_request_response_function()(prompt)

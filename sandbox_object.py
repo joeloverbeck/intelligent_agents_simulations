@@ -39,13 +39,22 @@ class SandboxObject:
         }
 
     def get_identifier(self):
+        """Returns the identifier of the SandboxObject
+
+        Returns:
+            str: the identifier of the SandboxObject
+        """
         return self._identifier
 
-    def set_action_status(self, action_status, silent=False):
-        """Sets the action status of the sandbox object
+    def set_action_status(
+        self, action_status: str, triggering_agent_name: str, silent=False
+    ):
+        """Sets the action status of the SandboxObject
 
         Args:
-            action_status (str): the new action status for the sandbox object
+            action_status (str): the new action status for the SandboxObject
+            triggering_agent_identifier (str): the identifier of the agent that triggers the change
+            silent (bool, optional): whether or not the change should be notified to subscribers. Defaults to False.
         """
         self._action_status = action_status
 
@@ -56,6 +65,7 @@ class SandboxObject:
                 {
                     "type": UpdateType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS,
                     "sandbox_object": self,
+                    "triggering_agent_name": triggering_agent_name,
                 }
             )
 

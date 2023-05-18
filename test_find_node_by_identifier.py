@@ -19,6 +19,16 @@ class TestFindNodeByIdentifier(unittest.TestCase):
         self.assertEqual(matching_node.name.get_identifier(), "tools")
         self.assertEqual(matching_node.name.description, "tools")
 
+    def test_can_locate_bed_in_environment_tree(self):
+        house = Node(Location("house", "house", "house"))
+        bedroom = Node(Location("bedroom", "bedroom", "bedroom"), parent=house)
+        bed = Node(SandboxObject("bed", "bed", "bed"), parent=bedroom)
+
+        matching_node = find_node_by_identifier(house, bed.name.get_identifier())
+
+        self.assertEqual(matching_node.name.name, "bed")
+        self.assertEqual(matching_node.name.get_identifier(), "bed")
+
 
 if __name__ == "__main__":
     unittest.main()

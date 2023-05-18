@@ -35,12 +35,13 @@ def find_node_by_identifier(root_node: Node, identifier: str):
         raise AlgorithmError(error_message) from exception
     except RecursionError as exception:
         error_message = f"In the function '{find_node_by_identifier.__name__}', trying to find a node with the identifier '{identifier}' "
-        error_message += f"caused a recursion error given the environment tree: {root_node} | amount of nodes in the tree: ({1 + len(root_node.descendants)})"
+        error_message += f"caused a recursion error given the environment tree: {root_node} | amount of descendants in the tree: ({len(root_node.descendants)})"
         raise AlgorithmError(error_message) from exception
 
     if matching_node is None:
         error_message = f"The function {find_node_by_identifier.__name__} couldn't find a node by the identifier '{identifier}' in the environment tree."
-        error_message += f"\nEnvironment tree:{root_node}"
+        error_message += f"\nEnvironment tree:{root_node} | number of descendants in environment tree: {len(root_node.descendants)}\n"
+        error_message += f"Descendants: {root_node.descendants}"
         raise AlgorithmError(error_message)
 
     return matching_node
@@ -71,7 +72,7 @@ def build_environment_tree(node_data, observer, parent=None):
         # the observer needs to subscribe to the sandbox object's updates
         instance.subscribe(observer)
 
-        instance.set_action_status(node_data["action_status"], silent=True)
+        instance.set_action_status(node_data["action_status"], None, silent=True)
 
     node = Node(instance, parent=parent)
 
@@ -98,7 +99,9 @@ def load_environment_tree_from_json(simulation_name, file_name, observer):
         Node: the root of the environment tree
     """
     # Ensure that the file name has the expected format
-    full_path = ensure_full_file_path_exists(simulation_name, replace_spaces_with_underscores(file_name))
+    full_path = ensure_full_file_path_exists(
+        simulation_name, replace_spaces_with_underscores(file_name)
+    )
 
     with open(full_path, "r", encoding="utf8") as file:
         data = json.load(file)
@@ -106,7 +109,9 @@ def load_environment_tree_from_json(simulation_name, file_name, observer):
     return build_environment_tree(data, observer)
 
 
-def save_environment_tree_to_json(simulation_name: str, file_name: str, root_node: Node):
+def save_environment_tree_to_json(
+    simulation_name: str, file_name: str, root_node: Node
+):
     """Saves an entire environment tree to json
 
     Args:

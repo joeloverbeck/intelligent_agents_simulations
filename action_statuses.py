@@ -105,7 +105,7 @@ def determine_action_statuses_for_using_object(
     simulation_name: str,
     request_agent_action_status_for_using_object_function,
     request_used_object_action_status_function,
-    save_environment_tree_to_json_function
+    save_environment_tree_to_json_function,
 ):
     """Determines the action statuses that will be set for using a sandbox object
 
@@ -136,11 +136,13 @@ def determine_action_statuses_for_using_object(
 
     # Should ask the AI model what happens to the state of the object
     agent.get_using_object().name.set_action_status(
-        request_used_object_action_status_function(agent)
+        request_used_object_action_status_function(agent), agent.name
     )
 
     # The state of the object has changed. The agent's environment tree needs to be saved to a file.
-    save_environment_tree_to_json_function(simulation_name, f"{agent.name}_environment", agent.get_environment_tree())
+    save_environment_tree_to_json_function(
+        simulation_name, f"{agent.name}_environment", agent.get_environment_tree()
+    )
 
 
 @validate_agent_type
@@ -170,7 +172,7 @@ def determine_if_agent_will_use_sandbox_object(agent: Agent, simulation_name: st
             simulation_name,
             request_agent_action_status_for_using_object,
             request_used_object_action_status,
-            save_environment_tree_to_json
+            save_environment_tree_to_json,
         )
 
         # sanity check

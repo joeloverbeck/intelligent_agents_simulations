@@ -17,12 +17,15 @@ def update_node_name_and_description(matching_node: Node, updated_node: Node):
     matching_node.name.description = updated_node.name.description
 
 
-def handle_sandbox_object_child(child: Node, updated_node: Node):
+def handle_sandbox_object_child(
+    child: Node, updated_node: Node, triggering_agent_name: str
+):
     """Handles the case that one of the children of the matching Location is a SandboxObject
 
     Args:
         child (Node): the node containing a SandboxObject
         updated_node (Node): the node with the updated values
+        triggering_agent_name (str): the name of the agent that triggered this update
 
     Raises:
         AlgorithmError: if the matching sandbox object node in the updated node is None
@@ -38,11 +41,13 @@ def handle_sandbox_object_child(child: Node, updated_node: Node):
 
     update_node_name_and_description(child, matching_sandbox_object_node)
 
-    child.name.set_action_status(matching_sandbox_object_node.name.get_action_status())
+    child.name.set_action_status(
+        matching_sandbox_object_node.name.get_action_status(), triggering_agent_name
+    )
 
 
 def handle_case_matching_node_in_environment_tree_is_location(
-    matching_node: Node, updated_node: Node
+    matching_node: Node, updated_node: Node, triggering_agent_name: str
 ):
     """Handles the case when the matching node in the environment tree is a Location
 
@@ -54,30 +59,36 @@ def handle_case_matching_node_in_environment_tree_is_location(
 
     for child in matching_node.children:
         if isinstance(child.name, SandboxObject):
-            handle_sandbox_object_child(child, updated_node)
+            handle_sandbox_object_child(child, updated_node, triggering_agent_name)
 
 
 def handle_case_matching_node_in_environment_tree_is_sandbox_object(
-    matching_node: Node, updated_node: Node
+    matching_node: Node, updated_node: Node, triggering_agent_name: str
 ):
     """Handle the case that the matching node in the environment tree is a SandboxObject
 
     Args:
         matching_node (Node): the matching node that contains a SandboxObject
         updated_node (Node): the node that contains the updated values
+        triggering_agent_name (str): the name of the agent that triggered this update.
     """
     # Update the values of the matching node sandbox object with those of the updated node
     update_node_name_and_description(matching_node, updated_node)
 
-    matching_node.name.set_action_status(updated_node.name.get_action_status(), silent=True)
+    matching_node.name.set_action_status(
+        updated_node.name.get_action_status(), triggering_agent_name, silent=True
+    )
 
 
-def update_node_in_environment_tree(updated_node: Node, environment_tree: Node):
+def update_node_in_environment_tree(
+    updated_node: Node, environment_tree: Node, triggering_agent_name: str
+):
     """Updates a node in an environment tree
 
     Args:
         updated_node (Node): the node that contains the updated values
         environment_tree (Node): the environment tree where a matching node will be searched, and updated
+        triggering_agent_name (str): the name of the agent that triggered this update
 
     Raises:
         AlgorithmError: if the updated node doesn't have a valid identifier
@@ -85,7 +96,9 @@ def update_node_in_environment_tree(updated_node: Node, environment_tree: Node):
         NodeTypeUnhandledError: if the matching node contains neither a Location nor a SandboxObject
     """
     if not isinstance(updated_node, Node):
-        raise AlgorithmError(f"The function {update_node_in_environment_tree.__name__} received an updated_node that wasn't a node: {updated_node}")
+        raise AlgorithmError(
+            f"The function {update_node_in_environment_tree.__name__} received an updated_node that wasn't a node: {updated_node}"
+        )
 
     # Ensure that the updated_node has an identifier, because otherwise we won't be able
     # to locate a matching node
@@ -111,11 +124,11 @@ def update_node_in_environment_tree(updated_node: Node, environment_tree: Node):
     # and then modify the values of all the children of that location that are SandboxObjects
     if isinstance(matching_node.name, Location):
         handle_case_matching_node_in_environment_tree_is_location(
-            matching_node, updated_node
+            matching_node, updated_node, triggering_agent_name
         )
     elif isinstance(matching_node.name, SandboxObject):
         handle_case_matching_node_in_environment_tree_is_sandbox_object(
-            matching_node, updated_node
+            matching_node, updated_node, triggering_agent_name
         )
     else:
         raise NodeTypeUnhandledError(
