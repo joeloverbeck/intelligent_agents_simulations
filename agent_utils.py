@@ -2,7 +2,7 @@ import json
 from anytree import Node
 from api_requests import request_response_from_human
 from environment import find_node_by_identifier, load_environment_tree_from_json
-from errors import AlgorithmError
+from errors import AlgorithmError, MissingAgentAttributeError
 from file_utils import ensure_full_file_path_exists
 from agent import Agent
 from location import Location
@@ -48,7 +48,14 @@ def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, obser
 
     agent.set_action_status(agents_data[key]["action_status"], silent=True)
 
-    # check the using object node
+    if "observation" not in agents_data[key]:
+        raise MissingAgentAttributeError(
+            f"Was unable to load the attribute 'observation' from the json file for agent {agent.name}."
+        )
+
+    agent.set_observation(agents_data[key]["observation"], silent=True)
+
+    # check the using object entry
     if agents_data[key]["using_object"] is not None:
         using_object = find_node_by_identifier(
             agent_environment_tree, agents_data[key]["using_object"]
@@ -56,7 +63,7 @@ def load_agent_attributes_from_raw_data(key, agents_data, simulation_name, obser
 
         agent.set_using_object(using_object, silent=True)
 
-    # check the destination node
+    # check the destination entry
     if agents_data[key]["destination_node"] is not None:
         destination_node = find_node_by_identifier(
             agent_environment_tree, agents_data[key]["destination_node"]
@@ -126,32 +133,35 @@ def is_agent_in_same_location_as_another_agent(
         bool, Agent: returns whether or not the agents are in the same containing location, and if their are,
         the second element of the tuple also contains the data of the second agent in the comparison
     """
-    # First, check if the update agent exists in the list of agents
-    if second_agent_name not in [a.name for a in agents]:
-        error_message = f"The function {is_agent_in_same_location_as_another_agent.__name__} was unable to find the agent in the list of agents."
-        error_message += (
-            f"Agent name: {agent.name} | Agent in the update {second_agent_name}."
+    # Create a dictionary for efficient lookup
+    agents_dict = {a.name: a for a in agents}
+
+    # Check if the second_agent_name exists in the dictionary
+    if second_agent_name not in agents_dict:
+        error_message = (
+            f"The function {is_agent_in_same_location_as_another_agent.__name__} was unable to find "
+            f"the second agent's name ({second_agent_name}) in the list of agents."
         )
         raise AlgorithmError(error_message)
 
-    for update_agent in agents:
-        if update_agent.name == second_agent_name:
-            # Find the containing location of both agents involved
-            agent_containing_location_identifier = (
-                determine_agent_containing_location_identifier(agent)
-            )
+    second_agent = agents_dict[second_agent_name]
 
-            update_agent_containing_location_identifier = (
-                determine_agent_containing_location_identifier(update_agent)
-            )
+    # Find the containing location of both agents involved
+    agent_containing_location_identifier = (
+        determine_agent_containing_location_identifier(agent)
+    )
 
-            if (
-                agent_containing_location_identifier
-                == update_agent_containing_location_identifier
-            ):
-                return True, update_agent
+    second_agent_containing_location_identifier = (
+        determine_agent_containing_location_identifier(second_agent)
+    )
 
-            return False, update_agent
+    is_in_same_location = (
+        agent_containing_location_identifier
+        == second_agent_containing_location_identifier
+    )
+
+    if is_in_same_location:
+        return is_in_same_location, second_agent
 
     return False, None
 

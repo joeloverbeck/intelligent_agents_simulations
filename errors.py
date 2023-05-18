@@ -14,6 +14,10 @@ class InvalidParameterError(Exception):
     """
 
 
+class MissingAgentAttributeError(Exception):
+    pass
+
+
 class MissingCharacterSummaryError(Exception):
     pass
 

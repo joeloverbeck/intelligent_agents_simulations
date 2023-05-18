@@ -3,9 +3,9 @@
 """
 from anytree import Node
 from api_requests import request_response_from_ai_model
+from enums import UpdateType
 from environment_tree_integrity import calculate_number_of_nodes_in_tree
 from errors import AlgorithmError, InvalidParameterError, MissingCharacterSummaryError
-from update_type import UpdateType
 
 
 class Agent:
@@ -34,6 +34,7 @@ class Agent:
 
         self._planned_action = None
         self._action_status = None
+        self._observation = None
         self._destination_node = None
         self._using_object = None
         self._is_player = False
@@ -140,6 +141,27 @@ class Agent:
         """
         return self._action_status
 
+    def set_observation(self, observation: str, silent=False):
+        """Sets a new observation for the agent
+
+        Args:
+            observation (str): the observation that will be set for the agent
+            silent (bool, optional): whether or not this update will be notified to subscribers. Defaults to False.
+        """
+        self._observation = observation
+
+        if not silent:
+            # needs to notify about the update.
+            self.notify({"type": UpdateType.AGENT_CHANGED_OBSERVATION, "agent": self})
+
+    def get_observation(self):
+        """Returns the agent's observation
+
+        Returns:
+            str: the agent's observation
+        """
+        return self._observation
+
     def set_character_summary(self, character_summary, silent=False):
         """Sets the character summary of the agent.
 
@@ -150,7 +172,9 @@ class Agent:
 
         if not silent:
             # Needs to notify of this update
-            self.notify({"type": UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY, "agent": self})
+            self.notify(
+                {"type": UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY, "agent": self}
+            )
 
     def set_using_object(self, sandbox_object_node, silent=False):
         """Sets the object node that the agent will be marked as using.

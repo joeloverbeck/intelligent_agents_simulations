@@ -2,12 +2,12 @@
 """
 from anytree import Node
 from agent import Agent
+from enums import UpdateType
 from environment import save_environment_tree_to_json
 from errors import AlgorithmError, InvalidParameterError
 from logging_messages import log_debug_message
 from navigation import determine_agent_destination_node
 from sandbox_object import SandboxObject
-from update_type import UpdateType
 from vector_storage import load_agent_memories, update_memories_database
 from wrappers import (
     validate_agent_has_character_summary,
@@ -186,13 +186,14 @@ def determine_if_agent_will_use_sandbox_object(agent: Agent, simulation_name: st
 @validate_agent_planned_action
 @validate_agent_has_character_summary
 def produce_action_statuses_for_agent_based_on_destination_node(
-    agent: Agent, destination_node: Node
+    agent: Agent, destination_node: Node, simulation_name: str
 ):
     """Produces action statuses for an agent based on the destination node passed
 
     Args:
         agent (Agent): the agent for whom the action statuses will be produced
         destination_node (Node): the destination node, of type Node
+        simulation_name (str): the name of the simulation involved
     """
     # Now we have both the action and the destination node.
     # If the destination node is the current node, the agent doesn't move.
@@ -207,7 +208,7 @@ def produce_action_statuses_for_agent_based_on_destination_node(
 
         return
 
-    determine_if_agent_will_use_sandbox_object(agent)
+    determine_if_agent_will_use_sandbox_object(agent, simulation_name)
 
     # Sanity check:
     if (

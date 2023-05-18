@@ -3,8 +3,8 @@ that can be interactable in the simulation
 """
 
 
+from enums import UpdateType
 from errors import InvalidParameterError
-from update_type import UpdateType
 
 
 class SandboxObject:

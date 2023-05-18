@@ -1,1 +1,24 @@
-{"Joel": {"age": 38, "planned_action": null, "action_status": "Joel is going to spend an hour taking a bath", "current_location_node": "bathtub", "destination_node": null, "using_object": "bathtub", "is_player": "true", "character_summary": "Name: Joel (age: 38)\nInnate traits: test\ntest\ntest\ntest"}, "Betty": {"age": 24, "planned_action": null, "action_status": "Betty is attempting to contact her neighbors to figure out what the fuck is going on.", "current_location_node": "phone", "destination_node": null, "using_object": "phone", "is_player": "true", "character_summary": "Name: Betty (age: 24)\nInnate traits: test\ntest\ntest\ntest"}}
+{
+    "Joel": {
+        "age": 38,
+        "planned_action": null,
+        "action_status": "Joel is going to spend an hour taking a bath",
+        "observation": null,
+        "current_location_node": "bathtub",
+        "destination_node": null,
+        "using_object": "bathtub",
+        "is_player": "true",
+        "character_summary": "Name: Joel (age: 38)\nInnate traits: test\ntest\ntest\ntest"
+    },
+    "Betty": {
+        "age": 24,
+        "planned_action": null,
+        "action_status": "Betty is attempting to contact her neighbors to figure out what the fuck is going on.",
+        "observation": null,
+        "current_location_node": "phone",
+        "destination_node": null,
+        "using_object": "phone",
+        "is_player": "true",
+        "character_summary": "Name: Betty (age: 24)\nInnate traits: test\ntest\ntest\ntest"
+    }
+}

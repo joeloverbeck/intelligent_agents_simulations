@@ -15,6 +15,7 @@ from agent_utils import (
     update_agent_current_location_node,
 )
 from character_summaries import request_character_summary
+from enums import ObservationType, RegisteredUpdateDataKey, UpdateType
 from environment import (
     load_environment_tree_from_json,
     save_environment_tree_to_json,
@@ -24,12 +25,10 @@ from errors import AlgorithmError, DirectoryDoesntExistError, InvalidParameterEr
 from initialization import set_initial_state_of_agent
 from logging_messages import log_simulation_message
 from navigation import perform_agent_movement
-from observation_system import ObservationSystem, RegisteredUpdateDataKey
-from registered_update_type import RegisteredUpdateType
+from observation_system import ObservationSystem
 from sandbox_object import SandboxObject
 from simulation_variables import load_simulation_variables, save_current_timestamp
 from update_location_in_environment_tree import update_node_in_environment_tree
-from update_type import UpdateType
 
 
 class Simulation:
@@ -172,7 +171,7 @@ class Simulation:
         process_updates(self, update_message)
 
     def register_update(
-        self, registered_update_type: RegisteredUpdateType, update_data: dict
+        self, registered_update_type: ObservationType, update_data: dict
     ):
         """Registers an update with the observation system
 
@@ -244,7 +243,7 @@ def handle_case_sandbox_object_changed_action_status(
 
     # Set the update in the dict
     simulation.register_update(
-        RegisteredUpdateType.SANDBOX_OBJECT_UPDATED,
+        ObservationType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS,
         {
             RegisteredUpdateDataKey.IDENTIFIER: update_message[
                 "sandbox_object"
@@ -282,7 +281,7 @@ def handle_case_agent_changed_current_location_node(
 
     # Set the update in the dict
     simulation.register_update(
-        RegisteredUpdateType.AGENT_MOVED_TO_LOCATION,
+        ObservationType.AGENT_MOVED_TO_LOCATION,
         {RegisteredUpdateDataKey.UPDATE_AGENT_NAME: update_message["agent"].name},
     )
 
@@ -333,9 +332,17 @@ def handle_case_agent_changed_using_object(
     log_simulation_message(simulation.name, message)
 
     simulation.register_update(
-        RegisteredUpdateType.AGENT_USING_OBJECT,
+        ObservationType.AGENT_USING_OBJECT,
         {RegisteredUpdateDataKey.UPDATE_AGENT_NAME: update_message["agent"].name},
     )
+
+    substitute_agent(simulation.get_agents(), update_message["agent"])
+    save_agents_to_json(simulation.name, simulation.get_agents())
+
+
+def handle_case_agent_changed_observation(simulation: Simulation, update_message: dict):
+    message = f"{simulation.current_timestamp.isoformat()} {update_message['agent'].name} changed the observation to: {update_message['agent'].get_observation()}"
+    log_simulation_message(simulation.name, message)
 
     substitute_agent(simulation.get_agents(), update_message["agent"])
     save_agents_to_json(simulation.name, simulation.get_agents())
@@ -385,3 +392,5 @@ def process_updates(simulation: Simulation, update_message: dict):
     elif update_message["type"] == UpdateType.AGENT_CONTINUES_USING_OBJECT:
         message = f"{simulation.current_timestamp.isoformat()} {update_message['agent'].name} continues using object: {update_message['agent'].get_using_object()}"
         log_simulation_message(simulation.name, message)
+    elif update_message["type"] == UpdateType.AGENT_CHANGED_OBSERVATION:
+        handle_case_agent_changed_observation(simulation, update_message)

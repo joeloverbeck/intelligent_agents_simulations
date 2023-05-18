@@ -1,7 +1,8 @@
 import datetime
-from anytree import Node
 from types import NoneType
 import unittest
+from anytree import Node
+
 from actions import create_action
 
 from agent import Agent

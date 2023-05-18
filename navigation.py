@@ -2,6 +2,7 @@
 """
 from anytree import Node
 from agent import Agent
+from enums import UpdateType
 from errors import AlgorithmError
 from location import Location
 from logging_messages import log_debug_message
@@ -14,7 +15,6 @@ from scoring import (
     request_rating_from_agent_for_location_node,
     request_rating_from_agent_for_sandbox_object_node,
 )
-from update_type import UpdateType
 from wrappers import (
     validate_agent_has_character_summary,
     validate_agent_planned_action,

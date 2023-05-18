@@ -35,3 +35,7 @@ def extract_rating_from_text(text, prompt_that_originated_text, silent=False):
 def remove_end_tag_from_ai_response(text):
     pattern = "</s>$"
     return re.sub(pattern, "", text)
+
+
+def does_text_contain_yes(text):
+    return bool(re.search(r"\byes\b", text, re.IGNORECASE))

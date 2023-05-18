@@ -3,6 +3,7 @@
         "age": 38,
         "planned_action": null,
         "action_status": "The crop of corn's new status is \"ready for harvest\".",
+        "observation": null,
         "current_location_node": "corn_crop",
         "destination_node": null,
         "using_object": "corn_crop",

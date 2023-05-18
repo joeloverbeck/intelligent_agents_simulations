@@ -162,7 +162,20 @@ def append_to_previous_json_memories_if_necessary(json_filename, memories):
 
 
 @validate_agent_type
-def save_memories(agent, current_timestamp, new_memories, new_index):
+def save_memories(
+    agent: Agent,
+    current_timestamp: datetime.datetime,
+    new_memories: list[str],
+    new_index: AnnoyIndex,
+):
+    """Saves a list of memories to the vector database (both annoy library and the json file)
+
+    Args:
+        agent (Agent): the agent whose new memories will be saved
+        current_timestamp (datetime.datetime): the current timestamp
+        new_memories (list[str]): the new memories that will be saved to the vector database
+        new_index (AnnoyIndex): the index of the vector database
+    """
     memories = {}
 
     for memory_description in new_memories:
