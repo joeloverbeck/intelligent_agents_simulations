@@ -3,7 +3,7 @@
 """
 from anytree import Node
 from api_requests import request_response_from_ai_model
-from enums import UpdateType
+from enums import UpdateMessageKey, UpdateType
 from environment_tree_integrity import calculate_number_of_nodes_in_tree
 from errors import AlgorithmError, InvalidParameterError, MissingCharacterSummaryError
 
@@ -85,8 +85,8 @@ class Agent:
         # Needs to notify the update
         self.notify(
             {
-                "type": UpdateType.AGENT_CHANGED_CURRENT_LOCATION_NODE,
-                "agent": self,
+                UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_CURRENT_LOCATION_NODE,
+                UpdateMessageKey.AGENT: self,
             }
         )
 
@@ -110,7 +110,10 @@ class Agent:
         if not silent:
             # needs to notify about the update
             self.notify(
-                {"type": UpdateType.AGENT_CHANGED_PLANNED_ACTION, "agent": self}
+                {
+                    UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_PLANNED_ACTION,
+                    UpdateMessageKey.AGENT: self,
+                }
             )
 
     def get_planned_action(self):
@@ -131,7 +134,12 @@ class Agent:
 
         if not silent:
             # needs to notify about the update.
-            self.notify({"type": UpdateType.AGENT_CHANGED_ACTION_STATUS, "agent": self})
+            self.notify(
+                {
+                    UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_ACTION_STATUS,
+                    UpdateMessageKey.AGENT: self,
+                }
+            )
 
     def get_action_status(self):
         """Returns the agent's action status
@@ -152,7 +160,12 @@ class Agent:
 
         if not silent:
             # needs to notify about the update.
-            self.notify({"type": UpdateType.AGENT_CHANGED_OBSERVATION, "agent": self})
+            self.notify(
+                {
+                    UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_OBSERVATION,
+                    UpdateMessageKey.AGENT: self,
+                }
+            )
 
     def get_observation(self):
         """Returns the agent's observation
@@ -173,7 +186,10 @@ class Agent:
         if not silent:
             # Needs to notify of this update
             self.notify(
-                {"type": UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY, "agent": self}
+                {
+                    UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_CHARACTER_SUMMARY,
+                    UpdateMessageKey.AGENT: self,
+                }
             )
 
     def set_using_object(self, sandbox_object_node, silent=False):
@@ -186,7 +202,12 @@ class Agent:
 
         if not silent:
             # notify of this change
-            self.notify({"type": UpdateType.AGENT_CHANGED_USING_OBJECT, "agent": self})
+            self.notify(
+                {
+                    UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_USING_OBJECT,
+                    UpdateMessageKey.AGENT: self,
+                }
+            )
 
     def get_using_object(self):
         """Returns the agent's 'using_object' value
@@ -245,7 +266,10 @@ class Agent:
         if not silent:
             # notify of this change
             self.notify(
-                {"type": UpdateType.AGENT_CHANGED_DESTINATION_NODE, "agent": self}
+                {
+                    UpdateMessageKey.TYPE: UpdateType.AGENT_CHANGED_DESTINATION_NODE,
+                    UpdateMessageKey.AGENT: self,
+                }
             )
 
     def get_destination_node(self):

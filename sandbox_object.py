@@ -3,7 +3,7 @@ that can be interactable in the simulation
 """
 
 
-from enums import UpdateType
+from enums import UpdateMessageKey, UpdateType
 from errors import InvalidParameterError
 
 
@@ -63,9 +63,9 @@ class SandboxObject:
         if not silent:
             self._notify(
                 {
-                    "type": UpdateType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS,
-                    "sandbox_object": self,
-                    "triggering_agent_name": triggering_agent_name,
+                    UpdateMessageKey.TYPE: UpdateType.SANDBOX_OBJECT_CHANGED_ACTION_STATUS,
+                    UpdateMessageKey.SANDBOX_OBJECT: self,
+                    UpdateMessageKey.OBSERVED_AGENT_NAME: triggering_agent_name,
                 }
             )
 

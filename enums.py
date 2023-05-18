@@ -3,6 +3,14 @@
 from enum import Enum
 
 
+class UpdateMessageKey(Enum):
+    TYPE = 1
+    SANDBOX_OBJECT = 2
+    AGENT = 3
+    OBSERVED_AGENT_NAME = 4
+    ACTION = 5
+
+
 class ProcessObservationParametersKey(Enum):
     """The keys to the dict of parameters for the process_observation function
 

@@ -2,7 +2,7 @@
 """
 from anytree import Node
 from agent import Agent
-from enums import UpdateType
+from enums import UpdateMessageKey, UpdateType
 from environment import save_environment_tree_to_json
 from errors import AlgorithmError, InvalidParameterError
 from logging_messages import log_debug_message
@@ -164,7 +164,12 @@ def determine_if_agent_will_use_sandbox_object(agent: Agent, simulation_name: st
         )
 
     if isinstance(agent.get_current_location_node().name, SandboxObject):
-        agent.notify({"type": UpdateType.AGENT_WILL_USE_SANDBOX_OBJECT, "agent": agent})
+        agent.notify(
+            {
+                UpdateMessageKey.TYPE: UpdateType.AGENT_WILL_USE_SANDBOX_OBJECT,
+                UpdateMessageKey.AGENT: agent,
+            }
+        )
 
         # At this point, the agent does not have a destination, and is already able to start using the sandbox object
         determine_action_statuses_for_using_object(
@@ -202,7 +207,12 @@ def produce_action_statuses_for_agent_based_on_destination_node(
     # If at this point the agent still has a destination, then the action status should
     # represent that.
     if agent.get_destination_node() is not None:
-        agent.notify({"type": UpdateType.AGENT_NEEDS_TO_MOVE, "agent": agent})
+        agent.notify(
+            {
+                UpdateMessageKey.TYPE: UpdateType.AGENT_NEEDS_TO_MOVE,
+                UpdateMessageKey.AGENT: agent,
+            }
+        )
 
         produce_action_status_for_movement(agent)
 
@@ -249,7 +259,11 @@ def produce_action_statuses_for_agent_and_sandbox_object(
     )
 
     agent.notify(
-        {"type": UpdateType.AGENT_PRODUCED_ACTION, "agent": agent, "action": action}
+        {
+            UpdateMessageKey.TYPE: UpdateType.AGENT_PRODUCED_ACTION,
+            UpdateMessageKey.AGENT: agent,
+            UpdateMessageKey.ACTION: action,
+        }
     )
 
     agent.set_planned_action(action)
